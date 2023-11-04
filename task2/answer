@@ -9,6 +9,8 @@ The only additional resource you will need is the datasheet, or at least the rel
 
 BCM2837 arm in ALT5 function mode
 
+found `BCM2837-Broadcom.pdf` online
+
 GPIO
 14, 32, and 40 are UART TXD1
 15, 33, and 41 are UART RXD1

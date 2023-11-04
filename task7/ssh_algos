@@ -1,0 +1,95 @@
+Starting Nmap 7.80 ( https://nmap.org ) at 2023-10-29 19:30 EDT
+--------------- Timing report ---------------
+  hostgroups: min 1, max 100000
+  rtt-timeouts: init 1000, min 100, max 10000
+  max-scan-delay: TCP 1000, UDP 1000, SCTP 1000
+  parallelism: min 0, max 0
+  max-retries: 10, host-timeout: 0
+  min-rate: 0, max-rate: 0
+---------------------------------------------
+NSE: Using Lua 5.3.
+NSE: Arguments from CLI:
+NSE: Loaded 46 scripts for scanning.
+NSE: Script Pre-scanning.
+NSE: Starting runlevel 1 (of 2) scan.
+Initiating NSE at 19:30
+Completed NSE at 19:30, 0.00s elapsed
+NSE: Starting runlevel 2 (of 2) scan.
+Initiating NSE at 19:30
+Completed NSE at 19:30, 0.00s elapsed
+mass_rdns: Using DNS server 127.0.0.53
+Initiating Connect Scan at 19:30
+Scanning localhost (127.0.0.1) [1 port]
+Discovered open port 7999/tcp on 127.0.0.1
+Completed Connect Scan at 19:30, 0.00s elapsed (1 total ports)
+Overall sending rates: 7462.69 packets / s.
+Initiating Service scan at 19:30
+Scanning 1 service on localhost (127.0.0.1)
+Completed Service scan at 19:30, 0.04s elapsed (1 service on 1 host)
+NSE: Script scanning 127.0.0.1.
+NSE: Starting runlevel 1 (of 2) scan.
+Initiating NSE at 19:30
+NSE: Starting ssh2-enum-algos against localhost (127.0.0.1:7999).
+NSE: Finished ssh2-enum-algos against localhost (127.0.0.1:7999).
+Completed NSE at 19:30, 0.08s elapsed
+NSE: Starting runlevel 2 (of 2) scan.
+Initiating NSE at 19:30
+Completed NSE at 19:30, 0.00s elapsed
+Nmap scan report for localhost (127.0.0.1)
+Host is up, received user-set (0.000082s latency).
+Scanned at 2023-10-29 19:30:17 EDT for 0s
+
+PORT     STATE SERVICE REASON  VERSION
+7999/tcp open  ssh     syn-ack OpenSSH 8.9p1 Ubuntu 3ubuntu0.4 (Ubuntu Linux; protocol 2.0)
+| ssh2-enum-algos:
+|   kex_algorithms: (10)
+|       curve25519-sha256
+|       curve25519-sha256@libssh.org
+|       ecdh-sha2-nistp256
+|       ecdh-sha2-nistp384
+|       ecdh-sha2-nistp521
+|       sntrup761x25519-sha512@openssh.com
+|       diffie-hellman-group-exchange-sha256
+|       diffie-hellman-group16-sha512
+|       diffie-hellman-group18-sha512
+|       diffie-hellman-group14-sha256
+|   server_host_key_algorithms: (4)
+|       rsa-sha2-512
+|       rsa-sha2-256
+|       ecdsa-sha2-nistp256
+|       ssh-ed25519
+|   encryption_algorithms: (6)
+|       chacha20-poly1305@openssh.com
+|       aes128-ctr
+|       aes192-ctr
+|       aes256-ctr
+|       aes128-gcm@openssh.com
+|       aes256-gcm@openssh.com
+|   mac_algorithms: (10)
+|       umac-64-etm@openssh.com
+|       umac-128-etm@openssh.com
+|       hmac-sha2-256-etm@openssh.com
+|       hmac-sha2-512-etm@openssh.com
+|       hmac-sha1-etm@openssh.com
+|       umac-64@openssh.com
+|       umac-128@openssh.com
+|       hmac-sha2-256
+|       hmac-sha2-512
+|       hmac-sha1
+|   compression_algorithms: (2)
+|       none
+|_      zlib@openssh.com
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+Final times for host: srtt: 82 rttvar: 5000  to: 100000
+
+NSE: Script Post-scanning.
+NSE: Starting runlevel 1 (of 2) scan.
+Initiating NSE at 19:30
+Completed NSE at 19:30, 0.00s elapsed
+NSE: Starting runlevel 2 (of 2) scan.
+Initiating NSE at 19:30
+Completed NSE at 19:30, 0.00s elapsed
+Read from /usr/bin/../share/nmap: nmap-payloads nmap-service-probes nmap-services.
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 0.47 seconds
+

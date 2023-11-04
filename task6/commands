@@ -1,0 +1,1815 @@
+snapshot-f2852ce48e77> db.listCommands()
+_addShard:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by shards. Do not call directly. Adds a new shard to a cluster.
+
+_configsvrAbortReshardCollection:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the sharding config server. Do not call directly. Aborts any in-progress resharding operations for this collection.
+
+_configsvrAddShard:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the sharding config server. Do not call directly. Validates and adds a new shard to the cluster.
+
+_configsvrAddShardToZone:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the sharding config server. Do not call directly. Validates and adds a new zone to the shard.
+
+_configsvrBalancerCollectionStatus:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the sharding config server. Do not call directly. Checks whether the chunks of a given collection are in a quiesced state or there are any which need to be moved because of (1) draining shards, (2) zone violation or (3) imbalance between shards.
+
+_configsvrBalancerStart:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the sharding config server. Do not call directly. Controls the balancer state.
+
+_configsvrBalancerStatus:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the sharding config server. Do not call directly. Controls the balancer state.
+
+_configsvrBalancerStop:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the sharding config server. Do not call directly. Controls the balancer state.
+
+_configsvrCleanupReshardCollection:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the sharding config server. Do not call directly. Aborts and cleans up any in-progress resharding operations for this collection.
+
+_configsvrClearJumboFlag:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the sharding config server. Do not call directly. Clears the jumbo flag of the chunk specified.
+
+_configsvrCollMod:  requiresAuth apiVersions deprecatedApiVersions
+Internal command, which is exported by the config server. Do not call directly. Runs the collMod command on the config server, potentially updating some of the collection metadata present on the config server.
+
+_configsvrCommitChunkMigration:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+should not be calling this directly
+
+_configsvrCommitChunkSplit:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is sent by a shard to the sharding config server. Do not call directly. Receives, validates, and processes a SplitChunkRequest.
+
+_configsvrCommitChunksMerge:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is sent by a shard to the sharding config server. Do not call directly. Receives, validates, and processes a ConfigSvrMergeChunks
+
+_configsvrCommitMovePrimary:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Reassign a new primary shard for the given database on the config server. This is an internal command only invokable on the config server, therefore do not call directly.
+
+_configsvrCommitReshardCollection:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the sharding config server. Do not call directly. Allows a reshard operation to enter critical section ASAP.
+
+_configsvrConfigureCollectionBalancing:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the sharding config server. Do not call directly.
+
+_configsvrCreateDatabase:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the sharding config server. Do not call directly. Create a database.
+
+_configsvrEnsureChunkVersionIsGreaterThan:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the sharding config server. Do not call directly.
+
+_configsvrMoveChunk:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the sharding config server. Do not call directly. Requests the balancer to move or rebalance a single chunk.
+
+_configsvrMoveRange:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command only invokable on the config server. Do not call directly. Requests the balancer to move a range.
+
+_configsvrRefineCollectionShardKey:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the sharding config server. Do not call directly. Adds a suffix to the shard key of an existing collection ('refines the shard key').
+
+_configsvrRemoveChunks:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the sharding config server. Do not call directly. Removes the chunks for the specified collectionUUID.
+
+_configsvrRemoveShard:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the sharding config server. Do not call directly. Removes a shard from the cluster.
+
+_configsvrRemoveShardFromZone:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the sharding config server. Do not call directly. Validates and removes the shard from the zone.
+
+_configsvrRemoveTags:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the sharding config server. Do not call directly. Removes the zone tags for the specified ns.
+
+_configsvrRenameCollectionMetadata:  requiresAuth apiVersions deprecatedApiVersions
+Internal command. Do not call directly. Renames a collection.
+
+_configsvrRepairShardedCollectionChunksHistory:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the sharding config server. Do not call directly.
+
+_configsvrReshardCollection:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the sharding config server. Do not call directly. Reshards a collection on a new shard key.
+
+_configsvrRunRestore:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+no help defined
+
+_configsvrSetAllowMigrations:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the sharding config server. Do not call directly. Sets the allowMigrations flag on the specified collection.
+
+_configsvrSetClusterParameter:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the config servers. Do not call directly. Sets a parameter in the cluster.
+
+_configsvrSetUserWriteBlockMode:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the config servers. Do not call directly. Sets the user write blocking mode on a sharded cluster.
+
+_configsvrUpdateZoneKeyRange:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the sharding config server. Do not call directly. Validates and assigns a new range to a zone.
+
+_flushDatabaseCacheUpdates:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command which waits for any pending routing table cache updates for a particular database to be written locally. The operationTime returned in the response metadata is guaranteed to be at least as late as the last routing table cache update to the local disk. Takes a 'forceRemoteRefresh' option to make this node refresh its cache from the config server before waiting for the last refresh to be persisted.
+
+_flushDatabaseCacheUpdatesWithWriteConcern:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command which waits for any pending routing table cache updates for a particular database to be written locally. The operationTime returned in the response metadata is guaranteed to be at least as late as the last routing table cache update to the local disk. Takes a 'forceRemoteRefresh' option to make this node refresh its cache from the config server before waiting for the last refresh to be persisted.
+
+_flushReshardingStateChange:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command used by the resharding coordinator to flush state changes to the participant shards while the critical section is active.
+
+_flushRoutingTableCacheUpdates:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command which waits for any pending routing table cache updates for a particular namespace to be written locally. The operationTime returned in the response metadata is guaranteed to be at least as late as the last routing table cache update to the local disk. Takes a 'forceRemoteRefresh' option to make this node refresh its cache from the config server before waiting for the last refresh to be persisted.
+
+_flushRoutingTableCacheUpdatesWithWriteConcern:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command which waits for any pending routing table cache updates for a particular namespace to be written locally. The operationTime returned in the response metadata is guaranteed to be at least as late as the last routing table cache update to the local disk. Takes a 'forceRemoteRefresh' option to make this node refresh its cache from the config server before waiting for the last refresh to be persisted.
+
+_getNextSessionMods:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+internal
+
+_getUserCacheGeneration:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+no help defined
+
+_isSelf:  secondaryOk apiVersions deprecatedApiVersions
+{ _isSelf : 1 } INTERNAL ONLY
+
+_killOperations:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+Internal command -- Kill operations on the target server by OperationKey.
+
+_mergeAuthzCollections:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+no help defined
+
+_migrateClone:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+internal
+
+_recvChunkAbort:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+internal
+
+_recvChunkCommit:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+internal
+
+_recvChunkReleaseCritSec:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+internal
+
+_recvChunkStart:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+internal
+
+_recvChunkStatus:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+internal
+
+_shardsvrAbortReshardCollection:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the shard server. Do not call directly. Aborts any in-progress resharding operations.
+
+_shardsvrCleanupReshardCollection:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the shard server. Do not call directly. Aborts and cleans up any in-progress resharding operations for this collection.
+
+_shardsvrCloneCatalogData:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+no help defined
+
+_shardsvrCollMod:  requiresAuth apiVersions deprecatedApiVersions
+Internal command, which is exported by the primary sharding server. Do not call directly. Modifies collection.
+
+_shardsvrCollModParticipant:  requiresAuth apiVersions deprecatedApiVersions
+Internal command, which is exported by the shards. Do not call directly. Unblocks CRUD and processes collMod.
+
+_shardsvrCommitReshardCollection:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the shard server. Do not call directly. Commits an in-progress resharding operations
+
+_shardsvrCompactStructuredEncryptionData:  requiresAuth apiVersions deprecatedApiVersions
+Internal command. Do not call directly. Compacts a ECOC collection.
+
+_shardsvrCreateCollection:  requiresAuth apiVersions deprecatedApiVersions
+Internal command. Do not call directly. Creates a collection.
+
+_shardsvrCreateCollectionParticipant:  requiresAuth apiVersions deprecatedApiVersions
+Internal command. Do not call directly. Creates a collection.
+
+_shardsvrDropCollection:  requiresAuth apiVersions deprecatedApiVersions
+Internal command, which is exported by the primary sharding server. Do not call directly. Drops a collection.
+
+_shardsvrDropCollectionIfUUIDNotMatching:  requiresAuth apiVersions deprecatedApiVersions
+Internal command aimed to remove stale entries from the local collection catalog.
+
+_shardsvrDropCollectionParticipant:  requiresAuth apiVersions deprecatedApiVersions
+Internal command, which is exported by secondary sharding servers. Do not call directly. Participates in droping a collection.
+
+_shardsvrDropDatabase:  requiresAuth apiVersions deprecatedApiVersions
+Internal command, which is exported by the primary sharding server. Do not call directly. Drops a database.
+
+_shardsvrDropDatabaseParticipant:  requiresAuth apiVersions deprecatedApiVersions
+Internal command, which is exported by secondary sharding servers. Do not call directly. Participates in droping a database.
+
+_shardsvrDropIndexes:  requiresAuth apiVersions deprecatedApiVersions
+Internal command. Do not call directly. Drops indexes.
+
+_shardsvrGetStatsForBalancing:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command invoked by the config server to retrieve statistics from shard used for balancing
+
+_shardsvrJoinMigrations:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command invoked by the config server to join any chunk migration activity executed by the shard
+
+_shardsvrMovePrimary:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+should not be calling this directly
+
+_shardsvrMoveRange:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command invoked by the config server to move a chunk/range
+
+_shardsvrParticipantBlock:  requiresAuth apiVersions deprecatedApiVersions
+Internal command, which is exported by the shards. Do not call directly. Blocks CRUD operations.
+
+_shardsvrRefineCollectionShardKey:  requiresAuth apiVersions deprecatedApiVersions
+Internal command, which is exported by the primary sharding server. Do not call directly. Refines Collection shard key.
+
+_shardsvrRenameCollection:  requiresAuth apiVersions deprecatedApiVersions
+Internal command. Do not call directly. Renames a collection.
+
+_shardsvrRenameCollectionParticipant:  requiresAuth apiVersions deprecatedApiVersions
+Internal command. Do not call directly. Locally renames a collection.
+
+_shardsvrRenameCollectionParticipantUnblock:  requiresAuth apiVersions deprecatedApiVersions
+Internal command. Do not call directly. Releases the critical section of source and target collections.
+
+_shardsvrReshardCollection:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command. Do not call directly. Reshards a collection.
+
+_shardsvrReshardingOperationTime:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command used by the resharding coordinator to query the elapsed and remaining time for the active resharding operation on participant shards.
+
+_shardsvrSetAllowMigrations:  requiresAuth apiVersions deprecatedApiVersions
+Internal command. Do not call directly. Enable/disable migrations in a collection.
+
+_shardsvrSetClusterParameter:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the shard servers. Do not call directly. Set's the cluster parameter in the node.
+
+_shardsvrSetUserWriteBlockMode:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command, which is exported by the shard servers. Do not call directly. Enables/disables user write blocking on shardsvrs.
+
+_transferMods:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+internal
+
+abortShardSplit:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Abort a shard split operation.
+
+abortTransaction:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Aborts a transaction
+
+aggregate:  requiresAuth secondaryOverrideOk apiVersions deprecatedApiVersions
+Runs the aggregation command. See http://dochub.mongodb.org/core/aggregation for more details.
+
+appendOplogNote:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Adds a no-op entry to the oplog
+
+applyOps:  requiresAuth apiVersions deprecatedApiVersions
+internal (sharding)
+{ applyOps : [ ] , preCondition : [ { ns : ... , q : ... , res : ... } ] }
+
+authenticate:  secondaryOk apiVersions deprecatedApiVersions
+no help defined
+
+autoSplitVector:  requiresAuth apiVersions deprecatedApiVersions
+Internal command returning the split points for a chunk, given the maximum chunk size.
+
+availableQueryOptions:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+no help defined
+
+buildInfo:  secondaryOk apiVersions deprecatedApiVersions
+get version #, etc.
+{ buildinfo:1 }
+
+checkShardingIndex:  requiresAuth apiVersions deprecatedApiVersions
+Internal command.
+
+
+cleanupOrphaned:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+no help defined
+
+cloneCollectionAsCapped:  requiresAuth apiVersions deprecatedApiVersions
+{ cloneCollectionAsCapped:<fromName>, toCollection:<toName>, size:<sizeInBytes> }
+
+clusterAbortTransaction:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+Aborts a transaction
+
+clusterAggregate:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+Runs the sharded aggregation command. See http://dochub.mongodb.org/core/aggregation for more details.
+
+clusterCommitTransaction:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+Commits a transaction
+
+clusterDelete:  requiresAuth apiVersions deprecatedApiVersions
+delete documents
+
+clusterFind:  requiresAuth secondaryOverrideOk apiVersions deprecatedApiVersions
+query for documents
+
+clusterGetMore:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+retrieve more documents for a cursor id
+
+clusterInsert:  requiresAuth apiVersions deprecatedApiVersions
+insert documents
+
+clusterUpdate:  requiresAuth apiVersions deprecatedApiVersions
+update documents
+
+collMod:  requiresAuth apiVersions deprecatedApiVersions
+Sets collection options.
+Example: { collMod: 'foo', viewOn: 'bar'} Example: { collMod: 'foo', index: {keyPattern: {a: 1}, expireAfterSeconds: 600} Example: { collMod: 'foo', index: {name: 'bar', expireAfterSeconds: 600} }
+
+
+collStats:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+{ collStats:"blog.posts" , scale : 1 } scale divides sizes e.g. for KB use 1024
+    avgObjSize - in bytes
+
+commitShardSplit:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Start an opereation to split a shard into its own slice.
+
+commitTransaction:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Commits a transaction
+
+compact:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+compact collection
+warning: this operation locks the database and is slow. you can cancel with killOp()
+{ compact : <collection_name>, [force:<bool>] }
+  force - allows to run on a replica set primary
+
+
+compactStructuredEncryptionData:  requiresAuth apiVersions deprecatedApiVersions
+no help defined
+
+connPoolStats:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+stats about connections between servers in a replica set or sharded cluster.
+
+connPoolSync:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+internal
+
+connectionStatus:  secondaryOk apiVersions deprecatedApiVersions
+no help defined
+
+convertToCapped:  requiresAuth apiVersions deprecatedApiVersions
+{ convertToCapped:<fromCollectionName>, size:<sizeInBytes> }
+
+coordinateCommitTransaction:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Coordinates the commit for a transaction. Only called by mongos.
+
+count:  requiresAuth secondaryOverrideOk apiVersions deprecatedApiVersions
+count objects in collection
+
+create:  requiresAuth apiVersions deprecatedApiVersions
+explicitly creates a collection or view
+{
+  create: <string: collection or view name> [,
+  capped: <bool: capped collection>,
+  autoIndexId: <bool: automatic creation of _id index>,
+  idIndex: <document: _id index specification>,
+  size: <int: size in bytes of the capped collection>,
+  max: <int: max number of documents in the capped collection>,
+  storageEngine: <document: storage engine configuration>,
+  validator: <document: validation rules>,
+  validationLevel: <string: validation level>,
+  validationAction: <string: validation action>,
+  indexOptionDefaults: <document: default configuration for indexes>,
+  viewOn: <string: name of source collection or view>,
+  pipeline: <array<object>: aggregation pipeline stage>,
+  collation: <document: default collation for the collection or view>,
+  changeStreamPreAndPostImages: <document: pre- and post-images options for change streams>,
+  writeConcern: <document: write concern expression for the operation>]
+}
+
+createIndexes:  requiresAuth apiVersions deprecatedApiVersions
+no help defined
+
+createRole:  requiresAuth apiVersions deprecatedApiVersions
+no help defined
+
+createUser:  requiresAuth apiVersions deprecatedApiVersions
+no help defined
+
+currentOp:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+no help defined
+
+dataSize:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+determine data size for a set of data in a certain range
+example: { dataSize:"blog.posts", keyPattern:{x:1}, min:{x:10}, max:{x:55} }
+min and max parameters are optional. They must either both be included or both omitted
+keyPattern is an optional parameter indicating an index pattern that would be usefulfor iterating over the min/max bounds. If keyPattern is omitted, it is inferred from the structure of min.
+note: This command may take a while to run
+
+dbCheck:  requiresAuth apiVersions deprecatedApiVersions
+Validate replica set consistency.
+Invoke with { dbCheck: <collection name/uuid>,
+              minKey: <first key, exclusive>,
+              maxKey: <last key, inclusive>,
+              maxCount: <try to keep a batch within maxCount number of docs>,
+              maxSize: <try to keep a batch withing maxSize of docs (bytes)>,
+              maxCountPerSecond: <max rate in docs/sec>
+              maxDocsPerBatch: <max number of docs/batch>
+              maxBytesPerBatch: <try to keep a batch within max bytes/batch>
+              maxBatchTimeMillis: <max time processing a batch in milliseconds>
+              readTimestamp: <bool, read at a timestamp without strong locks> }
+to check a collection.
+Invoke with {dbCheck: 1} to check all collections in the database.
+
+dbHash:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+no help defined
+
+dbStats:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+Get stats on a database. Not instantaneous. Slower for databases with large .ns files.
+Example: { dbStats:1, scale:1 }
+
+delete:  requiresAuth apiVersions deprecatedApiVersions
+delete documents
+
+distinct:  requiresAuth secondaryOverrideOk apiVersions deprecatedApiVersions
+{ distinct : 'collection name' , key : 'a.b' , query : {} }
+
+donorAbortMigration:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Abort a migration
+
+donorForgetMigration:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Forget a migration
+
+donorStartMigration:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Start migrating databases whose names match the specified prefix to the specified replica set.
+
+driverOIDTest:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+no help defined
+
+drop:  requiresAuth apiVersions deprecatedApiVersions
+drop a collection
+{drop : <collectionName>}
+
+dropAllRolesFromDatabase:  requiresAuth apiVersions deprecatedApiVersions
+no help defined
+
+dropAllUsersFromDatabase:  requiresAuth apiVersions deprecatedApiVersions
+no help defined
+
+dropConnections:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+Drop egress connections to specified host and port
+
+dropDatabase:  requiresAuth apiVersions deprecatedApiVersions
+drop (delete) this database
+
+dropIndexes:  requiresAuth apiVersions deprecatedApiVersions
+drop indexes for a collection
+
+dropRole:  requiresAuth apiVersions deprecatedApiVersions
+no help defined
+
+dropUser:  requiresAuth apiVersions deprecatedApiVersions
+no help defined
+
+endSessions:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+end a set of logical sessions
+
+explain:  requiresAuth secondaryOverrideOk apiVersions deprecatedApiVersions
+explain database reads and writes
+
+features:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+no help defined
+
+filemd5:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+ example: { filemd5 : ObjectId(aaaaaaa) , root : "fs" }
+
+find:  requiresAuth secondaryOverrideOk apiVersions deprecatedApiVersions
+query for documents
+
+findAndModify:  requiresAuth apiVersions deprecatedApiVersions
+{ findAndModify: "collection", query: {processed:false}, update: {$set: {processed:true}}, new: true}
+{ findAndModify: "collection", query: {processed:false}, remove: true, sort: {priority:-1}}
+Either update or remove is required, all other fields have default values.
+Output is in the "value" field
+
+
+flushRouterConfig:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+Flushes the cached routing information for a single collection, entire database (and its collections) or all databases, which would cause full reload from the config server on the next access.
+Usage:
+{flushRouterConfig: 1} flushes all databases
+{flushRouterConfig: 'db'} flushes only the given database (and its collections)
+{flushRouterconfig: 'db.coll'} flushes only the given collection
+
+forgetShardSplit:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Forget the shard split operation.
+
+fsync:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+http://dochub.mongodb.org/core/fsynccommand
+
+fsyncUnlock:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+no help defined
+
+getClusterParameter:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+Get in-memory cluster parameter value(s) from this node
+
+getCmdLineOpts:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+no help defined
+
+getDatabaseVersion:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+ example: { getDatabaseVersion : 'foo'  }
+
+getDefaultRWConcern:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+get the current read/write concern defaults being applied by this node
+
+getDiagnosticData:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+get latest diagnostic data collection snapshot
+
+getLastError:  secondaryOk apiVersions deprecatedApiVersions
+no longer supported
+
+getLog:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+{ getLog : '*' }  OR { getLog : 'global' }
+
+getMore:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+retrieve more results from an existing cursor
+
+getParameter:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+get administrative option(s)
+example:
+{ getParameter:1, notablescan:1 }
+pass a document as the value for getParameter to request options
+example:
+{ getParameter:{showDetails: true}, notablescan:1}
+supported:
+  AlwaysRecordTraffic
+  KeysRotationIntervalSec
+  ShardingTaskExecutorPoolHostTimeoutMS
+  ShardingTaskExecutorPoolMaxConnecting
+  ShardingTaskExecutorPoolMaxSize
+  ShardingTaskExecutorPoolMaxSizeForConfigServers
+  ShardingTaskExecutorPoolMinSize
+  ShardingTaskExecutorPoolMinSizeForConfigServers
+  ShardingTaskExecutorPoolRefreshRequirementMS
+  ShardingTaskExecutorPoolRefreshTimeoutMS
+  ShardingTaskExecutorPoolReplicaSetMatching
+  TransactionRecordMinimumLifetimeMinutes
+  acceptApiVersion2
+  aggregateOperationResourceConsumptionMetrics
+  allowDiskUseByDefault
+  allowMultipleArbiters
+  allowRolesFromX509Certificates
+  authSchemaVersion
+  authenticationMechanisms
+  authorizationManagerCacheSize
+  authorizationManagerPinnedUsers
+  authorizationManagerPinnedUsersRefreshIntervalMillis
+  automationServiceDescriptor
+  awsEC2InstanceMetadataUrl
+  awsECSInstanceMetadataUrl
+  backtraceLogFile
+  balancerChunksSelectionTimeoutMs
+  balancerMigrationsThrottlingMs
+  batchedDeletesTargetBatchDocs
+  batchedDeletesTargetBatchTimeMS
+  batchedDeletesTargetStagedDocBytes
+  batchedExpiredChangeStreamPreImageRemoval
+  bgSyncOplogFetcherBatchSize
+  changeSyncSourceThresholdMillis
+  chunkDefragmentationThrottlingMS
+  chunkMigrationConcurrency
+  clientCursorMonitorFrequencySecs
+  clusterAuthMode
+  clusterIpSourceAllowlist
+  collectionBulkLoaderBatchSizeInBytes
+  collectionClonerBatchSize
+  collectionClonerUsesExhaust
+  connPoolMaxConnsPerHost
+  connPoolMaxInUseConnsPerHost
+  connectTimeoutMs
+  coordinateCommitReturnImmediatelyAfterPersistingDecision
+  createRollbackDataFiles
+  cursorTimeoutMillis
+  dbCheckCollectionTryLockMaxAttempts
+  dbCheckCollectionTryLockMaxBackoffMillis
+  dbCheckCollectionTryLockMinBackoffMillis
+  dbCheckCollectionTryLockTimeoutMillis
+  dbCheckHealthLogEveryNBatches
+  defaultFindReplicaSetHostTimeoutMS
+  deprecatedWireOpsWarningPeriodInSeconds
+  diagnosticDataCollectionDirectoryPath
+  diagnosticDataCollectionDirectorySizeMB
+  diagnosticDataCollectionEnableLatencyHistograms
+  diagnosticDataCollectionEnabled
+  diagnosticDataCollectionFileSizeMB
+  diagnosticDataCollectionPeriodMillis
+  diagnosticDataCollectionSamplesPerChunk
+  diagnosticDataCollectionSamplesPerInterimUpdate
+  diagnosticDataCollectionStatsNamespaces
+  diagnosticDataCollectionVerboseTCMalloc
+  disableJavaScriptJIT
+  disableLogicalSessionCacheRefresh
+  disableNonSSLConnectionLogging
+  disableNonTLSConnectionLogging
+  disableResumableRangeDeleter
+  disableSplitHorizonIPCheck
+  disabledSecureAllocatorDomains
+  documentUnitSizeBytes
+  enableDefaultWriteConcernUpdatesForInitiate
+  enableElectionHandoff
+  enableFinerGrainedCatalogCacheRefresh
+  enableFlowControl
+  enableIndexBuildCommitQuorum
+  enableLocalhostAuthBypass
+  enableOverrideClusterChainingSetting
+  enableReconfigRollbackCommittedWritesCheck
+  enableSearchMeta
+  enableShardedIndexConsistencyCheck
+  enableTemporarilyUnavailableExceptions
+  enableTestCommands
+  enableTimeoutOfInactiveSessionCursors
+  enforceUserClusterSeparation
+  expiredChangeStreamPreImageRemovalJobSleepSecs
+  fassertOnLockTimeoutForStepUpDown
+  featureCompatibilityVersion
+  featureFlagAlwaysCreateConfigTransactionsPartialIndexOnStepUp
+  featureFlagBalanceAccordingToDataSize
+  featureFlagBatchMultiDeletes
+  featureFlagBlender
+  featureFlagBucketUnpackWithSort
+  featureFlagChangeStreamPreAndPostImages
+  featureFlagChangeStreamsRewrite
+  featureFlagChangeStreamsVisibility
+  featureFlagClusterWideConfig
+  featureFlagClusterWideConfigM2
+  featureFlagClusteredIndexes
+  featureFlagCollModIndexUnique
+  featureFlagColumnstoreIndexes
+  featureFlagCommandsAcceptCollectionUUID
+  featureFlagCommonQueryFramework
+  featureFlagConcurrencyInChunkMigration
+  featureFlagConnHealthMetrics
+  featureFlagDerivedMetadata
+  featureFlagDocumentSourceListCatalog
+  featureFlagEnableExecutionControl
+  featureFlagEnableShardingOptional
+  featureFlagExactTopNAccumulator
+  featureFlagFLE2
+  featureFlagFileCopyBasedInitialSync
+  featureFlagFill
+  featureFlagFryer
+  featureFlagHealthMonitoring
+  featureFlagInternalTransactions
+  featureFlagLastPointQuery
+  featureFlagLoadBalancer
+  featureFlagLocf
+  featureFlagMigrationRecipientCriticalSection
+  featureFlagMongoStore
+  featureFlagNewPersistedChunkVersionFormat
+  featureFlagNewWriteErrorExceptionFormat
+  featureFlagNoChangeStreamEventsDueToOrphans
+  featureFlagNoMoreAutoSplitter
+  featureFlagOptionalCfgSvr
+  featureFlagOrphanTracking
+  featureFlagPerCollBalancingSettings
+  featureFlagRecoverableRefineCollectionShardKeyCoordinator
+  featureFlagRecoverableShardsvrReshardCollectionCoordinator
+  featureFlagRequireTenantID
+  featureFlagResharding
+  featureFlagRetryableFindAndModify
+  featureFlagSBEGroupPushdown
+  featureFlagSBELookupPushdown
+  featureFlagSbeFull
+  featureFlagSbePlanCache
+  featureFlagSearchBatchSizeLimit
+  featureFlagSearchMeta
+  featureFlagSearchShardedFacets
+  featureFlagSelectiveBackup
+  featureFlagShardMerge
+  featureFlagShardSplit
+  featureFlagShardedLookup
+  featureFlagShardedSearchCustomSort
+  featureFlagShardedTimeSeries
+  featureFlagShardedTimeSeriesUpdateDelete
+  featureFlagShardingDataTransformMetrics
+  featureFlagSortArray
+  featureFlagSpoon
+  featureFlagTimeseriesBucketCompression
+  featureFlagTimeseriesBucketCompressionWithArrays
+  featureFlagTimeseriesMetricIndexes
+  featureFlagTimeseriesUpdatesAndDeletes
+  featureFlagToaster
+  featureFlagUpdateDocumentShardKeyUsingTransactionApi
+  featureFlagUserWriteBlocking
+  featureFlagVectorSearchPublicPreview
+  fileBasedInitialSyncExtendCursorTimeoutMS
+  fileBasedInitialSyncMaxCyclesWithoutProgress
+  fileBasedInitialSyncMaxLagSec
+  findChunksOnConfigTimeoutMS
+  fixedServiceExecutorRecursionLimit
+  fixedServiceExecutorThreadLimit
+  flowControlDecayConstant
+  flowControlFudgeFactor
+  flowControlMaxSamples
+  flowControlMinTicketsPerSecond
+  flowControlSamplePeriod
+  flowControlTargetLagSeconds
+  flowControlThresholdLagPercentage
+  flowControlTicketAdderConstant
+  flowControlTicketMultiplierConstant
+  flowControlWarnThresholdSeconds
+  forceRollbackViaRefetch
+  globalConnPoolIdleTimeoutMinutes
+  heapProfilingEnabled
+  heapProfilingSampleIntervalBytes
+  heartBeatFrequencyMs
+  honorSystemUmask
+  httpVerboseLogging
+  indexEntryUnitSizeBytes
+  indexMaxNumGeneratedKeysPerDocument
+  initialServiceExecutorThreadingModel
+  initialSyncMethod
+  initialSyncOplogBuffer
+  initialSyncOplogBufferPeekCacheSize
+  initialSyncOplogFetcherBatchSize
+  initialSyncSourceReadPreference
+  initialSyncTransientErrorRetryPeriodSeconds
+  internalBatchUserMultiDeletesForTest
+  internalCascadesOptimizerDisableBranchAndBound
+  internalCascadesOptimizerDisableGroupByAndUnionRIDIntersect
+  internalCascadesOptimizerDisableHashJoinRIDIntersect
+  internalCascadesOptimizerDisableIndexes
+  internalCascadesOptimizerDisableMergeJoinRIDIntersect
+  internalCascadesOptimizerDisableScan
+  internalCascadesOptimizerKeepRejectedPlans
+  internalDocumentSourceCursorBatchSizeBytes
+  internalDocumentSourceDensifyMaxMemoryBytes
+  internalDocumentSourceGroupMaxMemoryBytes
+  internalDocumentSourceLookupCacheSizeBytes
+  internalDocumentSourceSetWindowFieldsMaxMemoryBytes
+  internalGeoNearQuery2DMaxCoveringCells
+  internalGeoPredicateQuery2DMaxCoveringCells
+  internalIndexBuildBulkLoadYieldIterations
+  internalInsertMaxBatchSize
+  internalLookupStageIntermediateDocumentMaxSizeBytes
+  internalMaxSubPipelineViewDepth
+  internalPartialFilterExpressionMaxDepth
+  internalPipelineLengthLimit
+  internalProhibitShardOperationRetry
+  internalQueryAlwaysMergeOnPrimaryShard
+  internalQueryAppendIdToSetWindowFieldsSort
+  internalQueryCacheDisableInactiveEntries
+  internalQueryCacheEvictionRatio
+  internalQueryCacheMaxEntriesPerCollection
+  internalQueryCacheMaxSizeBytesBeforeStripDebugInfo
+  internalQueryCacheSize
+  internalQueryCacheWorksGrowthCoefficient
+  internalQueryCollectionMaxDataSizeBytesToChooseHashJoin
+  internalQueryCollectionMaxNoOfDocumentsToChooseHashJoin
+  internalQueryCollectionMaxStorageSizeBytesToChooseHashJoin
+  internalQueryDefaultDOP
+  internalQueryDesugarWhereToFunction
+  internalQueryDisableExchange
+  internalQueryDisableLookupExecutionUsingHashJoin
+  internalQueryDocumentSourceWriterBatchExtraReservedBytes
+  internalQueryEnableCSTParser
+  internalQueryEnableCascadesOptimizer
+  internalQueryEnableLoggingV2OplogEntries
+  internalQueryEnableSamplingCardinalityEstimator
+  internalQueryEnumerationMaxIntersectPerAnd
+  internalQueryEnumerationMaxOrSolutions
+  internalQueryEnumerationPreferLockstepOrEnumeration
+  internalQueryExecYieldIterations
+  internalQueryExecYieldPeriodMS
+  internalQueryExplainSizeThresholdBytes
+  internalQueryFLEAlwaysUseHighCardinalityMode
+  internalQueryFLERewriteMemoryLimit
+  internalQueryFacetBufferSizeBytes
+  internalQueryFacetMaxOutputDocSizeBytes
+  internalQueryForceClassicEngine
+  internalQueryForceIntersectionPlans
+  internalQueryGlobalProfilingFilter
+  internalQueryIgnoreUnknownJSONSchemaKeywords
+  internalQueryJavaScriptFnTimeoutMillis
+  internalQueryJavaScriptHeapSizeLimitMB
+  internalQueryMaxAddToSetBytes
+  internalQueryMaxAllowedDensifyDocs
+  internalQueryMaxBlockingSortMemoryUsageBytes
+  internalQueryMaxDocValidationErrorConsideredValues
+  internalQueryMaxJsEmitBytes
+  internalQueryMaxNumberOfFieldsToChooseFilteredColumnScan
+  internalQueryMaxNumberOfFieldsToChooseUnfilteredColumnScan
+  internalQueryMaxPushBytes
+  internalQueryMaxRangeBytes
+  internalQueryMaxScansToExplode
+  internalQueryPlanEvaluationCollFraction
+  internalQueryPlanEvaluationCollFractionSbe
+  internalQueryPlanEvaluationMaxResults
+  internalQueryPlanEvaluationWorks
+  internalQueryPlanEvaluationWorksSbe
+  internalQueryPlanOrChildrenIndependently
+  internalQueryPlannerEnableHashIntersection
+  internalQueryPlannerEnableIndexIntersection
+  internalQueryPlannerGenerateCoveredWholeIndexScans
+  internalQueryPlannerMaxIndexedSolutions
+  internalQueryProhibitBlockingMergeOnMongoS
+  internalQueryProhibitMergingOnMongoS
+  internalQueryS2GeoCoarsestLevel
+  internalQueryS2GeoFinestLevel
+  internalQueryS2GeoMaxCells
+  internalQuerySlotBasedExecutionDisableGroupPushdown
+  internalQuerySlotBasedExecutionDisableLookupPushdown
+  internalQuerySlotBasedExecutionHashAggApproxMemoryUseInBytesBeforeSpill
+  internalQuerySlotBasedExecutionHashAggMemoryCheckPerAdvanceAtLeast
+  internalQuerySlotBasedExecutionHashAggMemoryCheckPerAdvanceAtMost
+  internalQuerySlotBasedExecutionHashAggMemoryUseCheckMargin
+  internalQuerySlotBasedExecutionHashLookupApproxMemoryUseInBytesBeforeSpill
+  internalQuerySlotBasedExecutionMaxStaticIndexScanIntervals
+  internalQueryTopNAccumulatorBytes
+  internalSessionsReapThreshold
+  internalValidateFeaturesAsMaster
+  internalValidateFeaturesAsPrimary
+  javascriptProtection
+  joinIngressSessionsOnShutdown
+  journalCommitInterval
+  jsHeapLimitMB
+  loadBalancerPort
+  loadRoutingTableOnStartup
+  localLogicalSessionTimeoutMinutes
+  localThresholdMs
+  lockCodeSegmentsInMemory
+  logComponentVerbosity
+  logLevel
+  logicalSessionRefreshMillis
+  maintainValidCursorsAcrossSBEYieldandReadCommands
+  maxAcceptableLogicalClockDriftSecs
+  maxBSONDepth
+  maxCatchUpPercentageBeforeBlockingWrites
+  maxIndexBuildDrainBatchSize
+  maxIndexBuildDrainMemoryUsageMegabytes
+  maxIndexBuildMemoryUsageMegabytes
+  maxLogSizeKB
+  maxNumActiveUserIndexBuilds
+  maxNumSyncSourceChangesPerHour
+  maxNumberOfTransactionOperationsInSingleOplogEntry
+  maxOplogTruncationPointsAfterStartup
+  maxOplogTruncationPointsDuringStartup
+  maxSessions
+  maxSyncSourceLagSecs
+  maxTenantMigrationDonorServiceThreadPoolSize
+  maxTenantMigrationRecipientThreadPoolSize
+  maxTimeMSForHedgedReads
+  maxTransactionLockRequestTimeoutMillis
+  maxValidateMBperSec
+  maxValidateMemoryUsageMB
+  metadataRefreshInTransactionMaxWaitBehindCritSecMS
+  migrateCloneInsertionBatchDelayMS
+  migrateCloneInsertionBatchSize
+  migrationLockAcquisitionMaxWaitMS
+  minNumChunksForSessionsCollection
+  minOplogEntriesPerThread
+  minOplogTruncationPoints
+  minSnapshotHistoryWindowInSeconds
+  mirrorReads
+  mongosShutdownTimeoutMillisForSignaledShutdown
+  mrEnableSingleReduceOptimization
+  multitenancySupport
+  newShardExistingClusterTimeKeysExpirationSecs
+  notablescan
+  numInitialSyncAttempts
+  numInitialSyncConnectAttempts
+  numInitialSyncOplogFindAttempts
+  ocspCacheSize
+  ocspEnabled
+  ocspStaplingRefreshPeriodSecs
+  ocspValidationRefreshPeriodSecs
+  opensslCipherConfig
+  opensslCipherSuiteConfig
+  opensslDiffieHellmanParameters
+  operationMemoryPoolBlockInitialSizeKB
+  operationMemoryPoolBlockMaxSizeKB
+  oplogApplicationEnforcesSteadyStateConstraints
+  oplogBatchDelayMillis
+  oplogFetcherInitialSyncMaxFetcherRestarts
+  oplogFetcherSteadyStateMaxFetcherRestarts
+  oplogFetcherUsesExhaust
+  oplogInitialFindMaxSeconds
+  oplogNetworkTimeoutBufferSeconds
+  oplogRetriedFindMaxSeconds
+  oplogSamplingLogIntervalSeconds
+  oplogTruncationPointSizeMB
+  opportunisticSecondaryTargeting
+  orphanCleanupDelaySecs
+  periodicNoopIntervalSecs
+  planCacheSize
+  priorityTakeoverFreshnessWindowSeconds
+  processUmask
+  profileOperationResourceConsumptionMetrics
+  quiet
+  rangeDeleterBatchDelayMS
+  rangeDeleterBatchSize
+  readHedgingMode
+  receiveChunkWaitForRangeDeleterTimeoutMS
+  recoverFromOplogAsStandalone
+  recoverToOplogTimestamp
+  remainingReshardingOperationTimeThresholdMillis
+  replBatchLimitBytes
+  replBatchLimitOperations
+  replElectionTimeoutOffsetLimitFraction
+  replWriterMinThreadCount
+  replWriterThreadCount
+  replicaSetMonitorProtocol
+  reportOpWriteConcernCountersInServerStatus
+  requireApiVersion
+  reservedServiceExecutorRecursionLimit
+  reshardingCollectionClonerBatchSizeInBytes
+  reshardingCoordinatorServiceMaxThreadCount
+  reshardingCriticalSectionTimeoutMillis
+  reshardingDonorServiceMaxThreadCount
+  reshardingMinimumOperationDurationMillis
+  reshardingOplogApplierMaxLockRequestTimeoutMillis
+  reshardingOplogBatchLimitBytes
+  reshardingOplogBatchLimitOperations
+  reshardingOplogBatchTaskCount
+  reshardingRecipientServiceMaxThreadCount
+  reshardingTxnClonerProgressBatchSize
+  resumableIndexBuildMajorityOpTimeTimeoutMillis
+  rewriteStateChangeErrors
+  roleGraphInvalidationIsFatal
+  rollbackRemoteOplogQueryBatchSize
+  rollbackTimeLimitSecs
+  roundtripBsonColumnOnValidate
+  routingTableCacheChunkBucketSize
+  saslHostName
+  saslServiceName
+  saslauthdPath
+  scramIterationCount
+  scramSHA256IterationCount
+  scriptingEngineInterruptIntervalMS
+  shardSplitGarbageCollectionDelayMS
+  shardSplitTimeoutMS
+  shardedIndexConsistencyCheckIntervalMS
+  shutdownTimeoutMillisForSignaledShutdown
+  skipCorruptDocumentsWhenCloning
+  skipShardingConfigurationChecks
+  skipShellCursorFinalize
+  sslMode
+  sslWithholdClientCertificate
+  startupAuthSchemaValidation
+  startupRecoveryForRestore
+  storageEngineConcurrentReadTransactions
+  storageEngineConcurrentWriteTransactions
+  storageEngineQueueingPolicy
+  storageGlobalParams.directoryperdb
+  storeFindAndModifyImagesInSideCollection
+  supportArbitraryClusterKeyIndex
+  suppressNetworkInterfaceTransportLayerExceptions
+  suppressNoTLSPeerCertificateWarning
+  syncdelay
+  synchronousServiceExecutorRecursionLimit
+  takeUnstableCheckpointOnShutdown
+  taskExecutorPoolSize
+  tcmallocAggressiveMemoryDecommit
+  tcmallocEnableMarkThreadTemporarilyIdle
+  tcmallocMaxTotalThreadCacheBytes
+  tcmallocReleaseRate
+  tcpFastOpenClient
+  tcpFastOpenQueueSize
+  tcpFastOpenServer
+  temporarilyUnavailableBackoffBaseMs
+  temporarilyUnavailableMaxRetries
+  tenantApplierBatchSizeBytes
+  tenantApplierBatchSizeOps
+  tenantApplierThreadCount
+  tenantMigrationBlockingStateTimeoutMS
+  tenantMigrationDisableX509Auth
+  tenantMigrationExcludeDonorHostTimeoutMS
+  tenantMigrationExternalKeysRemovalBufferSecs
+  tenantMigrationGarbageCollectionDelayMS
+  tenantMigrationOplogBufferPeekCacheSize
+  tenantMigrationOplogFetcherBatchSize
+  testingDiagnosticsEnabled
+  testingSnapshotBehaviorInIsolation
+  timeseriesBucketMaxCount
+  timeseriesBucketMaxSize
+  timeseriesIdleBucketExpiryMaxCountPerAttempt
+  timeseriesIdleBucketExpiryMemoryUsageThreshold
+  timeseriesInsertMaxRetriesOnDuplicates
+  timeseriesValidateCompressedBuckets
+  tlsCATrusts
+  tlsMode
+  tlsOCSPSlowResponderWarningSecs
+  tlsOCSPStaplingTimeoutSecs
+  tlsOCSPVerifyTimeoutSecs
+  tlsWithholdClientCertificate
+  tlsX509ClusterAuthDNOverride
+  tlsX509ExpirationWarningThresholdDays
+  totalUnitWriteSizeBytes
+  traceExceptions
+  traceWriteConflictExceptions
+  trafficRecordingDirectory
+  transactionLifetimeLimitSeconds
+  transactionSizeLimitBytes
+  transactionTooLargeForCacheThreshold
+  ttlMonitorEnabled
+  ttlMonitorSleepSecs
+  unsupportedSyncSource
+  useReadOnceCursorsForIndexBuilds
+  waitForSecondaryBeforeNoopWriteMS
+  warmMinConnectionsInShardingTaskExecutorPoolOnStartup
+  warmMinConnectionsInShardingTaskExecutorPoolOnStartupWaitMS
+  watchdogPeriodSeconds
+  wiredTigerConcurrentReadTransactions
+  wiredTigerConcurrentWriteTransactions
+  wiredTigerCursorCacheSize
+  wiredTigerDirectoryForIndexes
+  wiredTigerEngineRuntimeConfig
+  wiredTigerEvictionDirtyMaxGB
+  wiredTigerEvictionDirtyTargetGB
+  wiredTigerFileHandleCloseIdleTime
+  wiredTigerFileHandleCloseMinimum
+  wiredTigerFileHandleCloseScanInterval
+  wiredTigerMaxCacheOverflowSizeGB
+  wiredTigerSessionCloseIdleTimeSecs
+  wiredTigerSkipTableLoggingChecksOnStartup
+  wiredTigerStressConfig
+  writePeriodicNoops
+{ getParameter:'*' } or { getParameter:{allParameters: true} } to get everything
+
+
+getShardMap:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+lists the set of shards known to this instance
+
+getShardVersion:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+ example: { getShardVersion : 'alleyinsider.foo'  }
+
+getnonce:  secondaryOk apiVersions deprecatedApiVersions
+internal
+
+grantPrivilegesToRole:  requiresAuth apiVersions deprecatedApiVersions
+no help defined
+
+grantRolesToRole:  requiresAuth apiVersions deprecatedApiVersions
+no help defined
+
+grantRolesToUser:  requiresAuth apiVersions deprecatedApiVersions
+no help defined
+
+hello:  secondaryOk apiVersions deprecatedApiVersions
+Check if this server is primary for a replica set
+{ hello : 1 }
+
+hostInfo:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+no help defined
+
+insert:  requiresAuth apiVersions deprecatedApiVersions
+insert documents
+
+internalRenameIfOptionsAndIndexesMatch:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command to rename and check collection options
+
+invalidateUserCache:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+no help defined
+
+isMaster:  secondaryOk apiVersions deprecatedApiVersions
+Check if this server is primary for a replica set
+{ isMaster : 1 }
+
+killAllSessions:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+kill all logical sessions, for a user, and their operations
+
+killAllSessionsByPattern:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+kill logical sessions by pattern
+
+killCursors:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+Kill a list of cursor ids
+
+killOp:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+no help defined
+
+killSessions:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+kill a logical session and its operations
+
+listCollections:  requiresAuth secondaryOverrideOk apiVersions deprecatedApiVersions
+list collections for this db
+
+listCommands:  secondaryOk apiVersions deprecatedApiVersions
+get a list of all db commands
+
+listDatabases:  requiresAuth adminOnly secondaryOverrideOk apiVersions deprecatedApiVersions
+{ listDatabases:1, [filter: <filterObject>] [, nameOnly: true ] }
+list databases on this server
+
+listIndexes:  requiresAuth secondaryOverrideOk apiVersions deprecatedApiVersions
+list indexes for a collection
+
+lockInfo:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+show all lock info on the server
+
+logRotate:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+no help defined
+
+logout:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+de-authenticate
+
+mapReduce:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+Runs the mapReduce command. See http://dochub.mongodb.org/core/mapreduce for details.
+
+mergeChunks:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal command to merge a contiguous range of chunks.
+Usage: { mergeChunks: <ns>, epoch: <epoch>, bounds: [<min key>, <max key>] }
+
+ping:  secondaryOk apiVersions deprecatedApiVersions
+a way to check that the server is alive. responds immediately even if server is in a db lock.
+
+planCacheClear:  requiresAuth secondaryOverrideOk apiVersions deprecatedApiVersions
+Drops one or all plan cache entries in a collection.
+
+planCacheClearFilters:  requiresAuth secondaryOverrideOk apiVersions deprecatedApiVersions
+Clears index filter for a single query shape or, if the query shape is omitted, all filters for the collection.
+
+planCacheListFilters:  requiresAuth secondaryOverrideOk apiVersions deprecatedApiVersions
+Displays index filters for all query shapes in a collection.
+
+planCacheSetFilter:  requiresAuth secondaryOverrideOk apiVersions deprecatedApiVersions
+Sets index filter for a query shape. Overrides existing filter.
+
+prepareTransaction:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Prepares a transaction on this shard; sent by a router or re-sent by the transaction commit coordinator for a cross-shard transaction
+
+profile:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+controls the behaviour of the performance profiler, the fraction of eligible operations which are sampled for logging/profiling, and the threshold duration at which ops become eligible. See http://docs.mongodb.org/manual/reference/command/profile
+
+reIndex:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+re-index a collection (can only be run on a standalone mongod)
+
+recipientForgetMigration:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Interrupts tenant migration data sync and marks that the recipient's durable state machine may be garbage collected.
+
+recipientSyncData:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal replica set command; instructs the recipient to sync data as part of a tenant migration.
+
+recipientVoteImportedFiles:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+An internal mongod command to track which members have imported all donated files during a tenant migration
+
+refreshSessions:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+renew a set of logical sessions
+
+renameCollection:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+ example: { renameCollection: foo.a, to: bar.b }
+
+replSetAbortPrimaryCatchUp:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+{ CmdReplSetAbortPrimaryCatchUp : 1 }
+Abort primary catch-up mode; immediately finish the transition to primary without fetching any further unreplicated writes from any other online nodes
+
+replSetFreeze:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+{ replSetFreeze : <seconds> }
+'freeze' state of member to the extent we can do that.  What this really means is that
+this node will not attempt to become primary until the time period specified expires.
+You can call again with {replSetFreeze:0} to unfreeze sooner.
+A process restart unfreezes the member also.
+http://dochub.mongodb.org/core/replicasetcommands
+
+replSetGetConfig:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+Returns the current replica set configuration{ replSetGetConfig : 1 }
+http://dochub.mongodb.org/core/replicasetcommands
+
+replSetGetRBID:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+no help defined
+
+replSetGetStatus:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+Report status of a replica set from the POV of this server
+{ replSetGetStatus : 1 }
+http://dochub.mongodb.org/core/replicasetcommands
+
+replSetHeartbeat:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+no help defined
+
+replSetInitiate:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+Initiate/christen a replica set.
+http://dochub.mongodb.org/core/replicasetcommands
+
+replSetMaintenance:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+{ replSetMaintenance : bool }
+Enable or disable maintenance mode.
+
+replSetReconfig:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+Adjust configuration of a replica set
+{ replSetReconfig : config_object }
+http://dochub.mongodb.org/core/replicasetcommands
+
+replSetRequestVotes:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+no help defined
+
+replSetResizeOplog:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+Resize oplog using size (in MBs) and optionally, retention (in terms of hours)
+
+replSetStepDown:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+{ replSetStepDown : <seconds> }
+Step down as primary.  Will not try to reelect self for the specified time period (1 minute if no numeric secs value specified, or secs is 0).
+(If another member with same priority takes over in the meantime, it will stay primary.)
+http://dochub.mongodb.org/core/replicasetcommands
+
+replSetStepUp:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+no help defined
+
+replSetSyncFrom:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+{ replSetSyncFrom : "host:port" }
+Change who this member is syncing from. Note: This will interrupt and restart an in-progress initial sync.
+
+replSetUpdatePosition:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+no help defined
+
+revokePrivilegesFromRole:  requiresAuth apiVersions deprecatedApiVersions
+no help defined
+
+revokeRolesFromRole:  requiresAuth apiVersions deprecatedApiVersions
+no help defined
+
+revokeRolesFromUser:  requiresAuth apiVersions deprecatedApiVersions
+no help defined
+
+rolesInfo:  requiresAuth secondaryOverrideOk apiVersions deprecatedApiVersions
+no help defined
+
+rotateCertificates:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+Rotate certificates for new SSL connections
+
+saslContinue:  secondaryOk apiVersions deprecatedApiVersions
+Subsequent steps in a SASL authentication conversation.
+
+saslStart:  secondaryOk apiVersions deprecatedApiVersions
+First step in a SASL authentication conversation.
+
+serverStatus:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+returns lots of administrative server statistics
+
+setClusterParameter:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Set cluster parameter on replica set or node
+
+setDefaultRWConcern:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+set the current read/write concern defaults (cluster-wide)
+
+setFeatureCompatibilityVersion:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Set the featureCompatibilityVersion used by this cluster. If set to '5.0', then features introduced in versions greater than '5.0' will be disabled If set to '5.3', then features introduced in '6.0' will be disabled. If set to '6.0', then '6.0' features are enabled, and all nodes in the cluster must be binary version 6.0. See https://docs.mongodb.com/master/release-notes/5.0-compatibility/#feature-compatibility.
+
+setIndexCommitQuorum:  requiresAuth apiVersions deprecatedApiVersions
+Resets the commitQuorum for the given index builds in a collection. Usage:
+{
+    setIndexCommitQuorum: <string> collection name,
+    indexNames: array<string> list of index names,
+    commitQuorum: <string|number|object> option to define the required quorum for
+                  the index builds to commit
+}
+
+setParameter:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+set administrative option(s)
+{ setParameter:1, <param>:<value> }
+supported:
+  AlwaysRecordTraffic
+  KeysRotationIntervalSec
+  ShardingTaskExecutorPoolHostTimeoutMS
+  ShardingTaskExecutorPoolMaxConnecting
+  ShardingTaskExecutorPoolMaxSize
+  ShardingTaskExecutorPoolMaxSizeForConfigServers
+  ShardingTaskExecutorPoolMinSize
+  ShardingTaskExecutorPoolMinSizeForConfigServers
+  ShardingTaskExecutorPoolRefreshRequirementMS
+  ShardingTaskExecutorPoolRefreshTimeoutMS
+  ShardingTaskExecutorPoolReplicaSetMatching
+  TransactionRecordMinimumLifetimeMinutes
+  acceptApiVersion2
+  aggregateOperationResourceConsumptionMetrics
+  allowDiskUseByDefault
+  allowMultipleArbiters
+  allowRolesFromX509Certificates
+  authSchemaVersion
+  authenticationMechanisms
+  authorizationManagerCacheSize
+  authorizationManagerPinnedUsers
+  authorizationManagerPinnedUsersRefreshIntervalMillis
+  automationServiceDescriptor
+  awsEC2InstanceMetadataUrl
+  awsECSInstanceMetadataUrl
+  backtraceLogFile
+  balancerChunksSelectionTimeoutMs
+  balancerMigrationsThrottlingMs
+  batchedDeletesTargetBatchDocs
+  batchedDeletesTargetBatchTimeMS
+  batchedDeletesTargetStagedDocBytes
+  batchedExpiredChangeStreamPreImageRemoval
+  bgSyncOplogFetcherBatchSize
+  changeSyncSourceThresholdMillis
+  chunkDefragmentationThrottlingMS
+  chunkMigrationConcurrency
+  clientCursorMonitorFrequencySecs
+  clusterAuthMode
+  clusterIpSourceAllowlist
+  collectionBulkLoaderBatchSizeInBytes
+  collectionClonerBatchSize
+  collectionClonerUsesExhaust
+  connPoolMaxConnsPerHost
+  connPoolMaxInUseConnsPerHost
+  connectTimeoutMs
+  coordinateCommitReturnImmediatelyAfterPersistingDecision
+  createRollbackDataFiles
+  cursorTimeoutMillis
+  dbCheckCollectionTryLockMaxAttempts
+  dbCheckCollectionTryLockMaxBackoffMillis
+  dbCheckCollectionTryLockMinBackoffMillis
+  dbCheckCollectionTryLockTimeoutMillis
+  dbCheckHealthLogEveryNBatches
+  defaultFindReplicaSetHostTimeoutMS
+  deprecatedWireOpsWarningPeriodInSeconds
+  diagnosticDataCollectionDirectoryPath
+  diagnosticDataCollectionDirectorySizeMB
+  diagnosticDataCollectionEnableLatencyHistograms
+  diagnosticDataCollectionEnabled
+  diagnosticDataCollectionFileSizeMB
+  diagnosticDataCollectionPeriodMillis
+  diagnosticDataCollectionSamplesPerChunk
+  diagnosticDataCollectionSamplesPerInterimUpdate
+  diagnosticDataCollectionStatsNamespaces
+  diagnosticDataCollectionVerboseTCMalloc
+  disableJavaScriptJIT
+  disableLogicalSessionCacheRefresh
+  disableNonSSLConnectionLogging
+  disableNonTLSConnectionLogging
+  disableResumableRangeDeleter
+  disableSplitHorizonIPCheck
+  disabledSecureAllocatorDomains
+  documentUnitSizeBytes
+  enableDefaultWriteConcernUpdatesForInitiate
+  enableElectionHandoff
+  enableFinerGrainedCatalogCacheRefresh
+  enableFlowControl
+  enableIndexBuildCommitQuorum
+  enableLocalhostAuthBypass
+  enableOverrideClusterChainingSetting
+  enableReconfigRollbackCommittedWritesCheck
+  enableSearchMeta
+  enableShardedIndexConsistencyCheck
+  enableTemporarilyUnavailableExceptions
+  enableTestCommands
+  enableTimeoutOfInactiveSessionCursors
+  enforceUserClusterSeparation
+  expiredChangeStreamPreImageRemovalJobSleepSecs
+  fassertOnLockTimeoutForStepUpDown
+  featureCompatibilityVersion
+  featureFlagAlwaysCreateConfigTransactionsPartialIndexOnStepUp
+  featureFlagBalanceAccordingToDataSize
+  featureFlagBatchMultiDeletes
+  featureFlagBlender
+  featureFlagBucketUnpackWithSort
+  featureFlagChangeStreamPreAndPostImages
+  featureFlagChangeStreamsRewrite
+  featureFlagChangeStreamsVisibility
+  featureFlagClusterWideConfig
+  featureFlagClusterWideConfigM2
+  featureFlagClusteredIndexes
+  featureFlagCollModIndexUnique
+  featureFlagColumnstoreIndexes
+  featureFlagCommandsAcceptCollectionUUID
+  featureFlagCommonQueryFramework
+  featureFlagConcurrencyInChunkMigration
+  featureFlagConnHealthMetrics
+  featureFlagDerivedMetadata
+  featureFlagDocumentSourceListCatalog
+  featureFlagEnableExecutionControl
+  featureFlagEnableShardingOptional
+  featureFlagExactTopNAccumulator
+  featureFlagFLE2
+  featureFlagFileCopyBasedInitialSync
+  featureFlagFill
+  featureFlagFryer
+  featureFlagHealthMonitoring
+  featureFlagInternalTransactions
+  featureFlagLastPointQuery
+  featureFlagLoadBalancer
+  featureFlagLocf
+  featureFlagMigrationRecipientCriticalSection
+  featureFlagMongoStore
+  featureFlagNewPersistedChunkVersionFormat
+  featureFlagNewWriteErrorExceptionFormat
+  featureFlagNoChangeStreamEventsDueToOrphans
+  featureFlagNoMoreAutoSplitter
+  featureFlagOptionalCfgSvr
+  featureFlagOrphanTracking
+  featureFlagPerCollBalancingSettings
+  featureFlagRecoverableRefineCollectionShardKeyCoordinator
+  featureFlagRecoverableShardsvrReshardCollectionCoordinator
+  featureFlagRequireTenantID
+  featureFlagResharding
+  featureFlagRetryableFindAndModify
+  featureFlagSBEGroupPushdown
+  featureFlagSBELookupPushdown
+  featureFlagSbeFull
+  featureFlagSbePlanCache
+  featureFlagSearchBatchSizeLimit
+  featureFlagSearchMeta
+  featureFlagSearchShardedFacets
+  featureFlagSelectiveBackup
+  featureFlagShardMerge
+  featureFlagShardSplit
+  featureFlagShardedLookup
+  featureFlagShardedSearchCustomSort
+  featureFlagShardedTimeSeries
+  featureFlagShardedTimeSeriesUpdateDelete
+  featureFlagShardingDataTransformMetrics
+  featureFlagSortArray
+  featureFlagSpoon
+  featureFlagTimeseriesBucketCompression
+  featureFlagTimeseriesBucketCompressionWithArrays
+  featureFlagTimeseriesMetricIndexes
+  featureFlagTimeseriesUpdatesAndDeletes
+  featureFlagToaster
+  featureFlagUpdateDocumentShardKeyUsingTransactionApi
+  featureFlagUserWriteBlocking
+  featureFlagVectorSearchPublicPreview
+  fileBasedInitialSyncExtendCursorTimeoutMS
+  fileBasedInitialSyncMaxCyclesWithoutProgress
+  fileBasedInitialSyncMaxLagSec
+  findChunksOnConfigTimeoutMS
+  fixedServiceExecutorRecursionLimit
+  fixedServiceExecutorThreadLimit
+  flowControlDecayConstant
+  flowControlFudgeFactor
+  flowControlMaxSamples
+  flowControlMinTicketsPerSecond
+  flowControlSamplePeriod
+  flowControlTargetLagSeconds
+  flowControlThresholdLagPercentage
+  flowControlTicketAdderConstant
+  flowControlTicketMultiplierConstant
+  flowControlWarnThresholdSeconds
+  forceRollbackViaRefetch
+  globalConnPoolIdleTimeoutMinutes
+  heapProfilingEnabled
+  heapProfilingSampleIntervalBytes
+  heartBeatFrequencyMs
+  honorSystemUmask
+  httpVerboseLogging
+  indexEntryUnitSizeBytes
+  indexMaxNumGeneratedKeysPerDocument
+  initialServiceExecutorThreadingModel
+  initialSyncMethod
+  initialSyncOplogBuffer
+  initialSyncOplogBufferPeekCacheSize
+  initialSyncOplogFetcherBatchSize
+  initialSyncSourceReadPreference
+  initialSyncTransientErrorRetryPeriodSeconds
+  internalBatchUserMultiDeletesForTest
+  internalCascadesOptimizerDisableBranchAndBound
+  internalCascadesOptimizerDisableGroupByAndUnionRIDIntersect
+  internalCascadesOptimizerDisableHashJoinRIDIntersect
+  internalCascadesOptimizerDisableIndexes
+  internalCascadesOptimizerDisableMergeJoinRIDIntersect
+  internalCascadesOptimizerDisableScan
+  internalCascadesOptimizerKeepRejectedPlans
+  internalDocumentSourceCursorBatchSizeBytes
+  internalDocumentSourceDensifyMaxMemoryBytes
+  internalDocumentSourceGroupMaxMemoryBytes
+  internalDocumentSourceLookupCacheSizeBytes
+  internalDocumentSourceSetWindowFieldsMaxMemoryBytes
+  internalGeoNearQuery2DMaxCoveringCells
+  internalGeoPredicateQuery2DMaxCoveringCells
+  internalIndexBuildBulkLoadYieldIterations
+  internalInsertMaxBatchSize
+  internalLookupStageIntermediateDocumentMaxSizeBytes
+  internalMaxSubPipelineViewDepth
+  internalPartialFilterExpressionMaxDepth
+  internalPipelineLengthLimit
+  internalProhibitShardOperationRetry
+  internalQueryAlwaysMergeOnPrimaryShard
+  internalQueryAppendIdToSetWindowFieldsSort
+  internalQueryCacheDisableInactiveEntries
+  internalQueryCacheEvictionRatio
+  internalQueryCacheMaxEntriesPerCollection
+  internalQueryCacheMaxSizeBytesBeforeStripDebugInfo
+  internalQueryCacheSize
+  internalQueryCacheWorksGrowthCoefficient
+  internalQueryCollectionMaxDataSizeBytesToChooseHashJoin
+  internalQueryCollectionMaxNoOfDocumentsToChooseHashJoin
+  internalQueryCollectionMaxStorageSizeBytesToChooseHashJoin
+  internalQueryDefaultDOP
+  internalQueryDesugarWhereToFunction
+  internalQueryDisableExchange
+  internalQueryDisableLookupExecutionUsingHashJoin
+  internalQueryDocumentSourceWriterBatchExtraReservedBytes
+  internalQueryEnableCSTParser
+  internalQueryEnableCascadesOptimizer
+  internalQueryEnableLoggingV2OplogEntries
+  internalQueryEnableSamplingCardinalityEstimator
+  internalQueryEnumerationMaxIntersectPerAnd
+  internalQueryEnumerationMaxOrSolutions
+  internalQueryEnumerationPreferLockstepOrEnumeration
+  internalQueryExecYieldIterations
+  internalQueryExecYieldPeriodMS
+  internalQueryExplainSizeThresholdBytes
+  internalQueryFLEAlwaysUseHighCardinalityMode
+  internalQueryFLERewriteMemoryLimit
+  internalQueryFacetBufferSizeBytes
+  internalQueryFacetMaxOutputDocSizeBytes
+  internalQueryForceClassicEngine
+  internalQueryForceIntersectionPlans
+  internalQueryGlobalProfilingFilter
+  internalQueryIgnoreUnknownJSONSchemaKeywords
+  internalQueryJavaScriptFnTimeoutMillis
+  internalQueryJavaScriptHeapSizeLimitMB
+  internalQueryMaxAddToSetBytes
+  internalQueryMaxAllowedDensifyDocs
+  internalQueryMaxBlockingSortMemoryUsageBytes
+  internalQueryMaxDocValidationErrorConsideredValues
+  internalQueryMaxJsEmitBytes
+  internalQueryMaxNumberOfFieldsToChooseFilteredColumnScan
+  internalQueryMaxNumberOfFieldsToChooseUnfilteredColumnScan
+  internalQueryMaxPushBytes
+  internalQueryMaxRangeBytes
+  internalQueryMaxScansToExplode
+  internalQueryPlanEvaluationCollFraction
+  internalQueryPlanEvaluationCollFractionSbe
+  internalQueryPlanEvaluationMaxResults
+  internalQueryPlanEvaluationWorks
+  internalQueryPlanEvaluationWorksSbe
+  internalQueryPlanOrChildrenIndependently
+  internalQueryPlannerEnableHashIntersection
+  internalQueryPlannerEnableIndexIntersection
+  internalQueryPlannerGenerateCoveredWholeIndexScans
+  internalQueryPlannerMaxIndexedSolutions
+  internalQueryProhibitBlockingMergeOnMongoS
+  internalQueryProhibitMergingOnMongoS
+  internalQueryS2GeoCoarsestLevel
+  internalQueryS2GeoFinestLevel
+  internalQueryS2GeoMaxCells
+  internalQuerySlotBasedExecutionDisableGroupPushdown
+  internalQuerySlotBasedExecutionDisableLookupPushdown
+  internalQuerySlotBasedExecutionHashAggApproxMemoryUseInBytesBeforeSpill
+  internalQuerySlotBasedExecutionHashAggMemoryCheckPerAdvanceAtLeast
+  internalQuerySlotBasedExecutionHashAggMemoryCheckPerAdvanceAtMost
+  internalQuerySlotBasedExecutionHashAggMemoryUseCheckMargin
+  internalQuerySlotBasedExecutionHashLookupApproxMemoryUseInBytesBeforeSpill
+  internalQuerySlotBasedExecutionMaxStaticIndexScanIntervals
+  internalQueryTopNAccumulatorBytes
+  internalSessionsReapThreshold
+  internalValidateFeaturesAsMaster
+  internalValidateFeaturesAsPrimary
+  javascriptProtection
+  joinIngressSessionsOnShutdown
+  journalCommitInterval
+  jsHeapLimitMB
+  loadBalancerPort
+  loadRoutingTableOnStartup
+  localLogicalSessionTimeoutMinutes
+  localThresholdMs
+  lockCodeSegmentsInMemory
+  logComponentVerbosity
+  logLevel
+  logicalSessionRefreshMillis
+  maintainValidCursorsAcrossSBEYieldandReadCommands
+  maxAcceptableLogicalClockDriftSecs
+  maxBSONDepth
+  maxCatchUpPercentageBeforeBlockingWrites
+  maxIndexBuildDrainBatchSize
+  maxIndexBuildDrainMemoryUsageMegabytes
+  maxIndexBuildMemoryUsageMegabytes
+  maxLogSizeKB
+  maxNumActiveUserIndexBuilds
+  maxNumSyncSourceChangesPerHour
+  maxNumberOfTransactionOperationsInSingleOplogEntry
+  maxOplogTruncationPointsAfterStartup
+  maxOplogTruncationPointsDuringStartup
+  maxSessions
+  maxSyncSourceLagSecs
+  maxTenantMigrationDonorServiceThreadPoolSize
+  maxTenantMigrationRecipientThreadPoolSize
+  maxTimeMSForHedgedReads
+  maxTransactionLockRequestTimeoutMillis
+  maxValidateMBperSec
+  maxValidateMemoryUsageMB
+  metadataRefreshInTransactionMaxWaitBehindCritSecMS
+  migrateCloneInsertionBatchDelayMS
+  migrateCloneInsertionBatchSize
+  migrationLockAcquisitionMaxWaitMS
+  minNumChunksForSessionsCollection
+  minOplogEntriesPerThread
+  minOplogTruncationPoints
+  minSnapshotHistoryWindowInSeconds
+  mirrorReads
+  mongosShutdownTimeoutMillisForSignaledShutdown
+  mrEnableSingleReduceOptimization
+  multitenancySupport
+  newShardExistingClusterTimeKeysExpirationSecs
+  notablescan
+  numInitialSyncAttempts
+  numInitialSyncConnectAttempts
+  numInitialSyncOplogFindAttempts
+  ocspCacheSize
+  ocspEnabled
+  ocspStaplingRefreshPeriodSecs
+  ocspValidationRefreshPeriodSecs
+  opensslCipherConfig
+  opensslCipherSuiteConfig
+  opensslDiffieHellmanParameters
+  operationMemoryPoolBlockInitialSizeKB
+  operationMemoryPoolBlockMaxSizeKB
+  oplogApplicationEnforcesSteadyStateConstraints
+  oplogBatchDelayMillis
+  oplogFetcherInitialSyncMaxFetcherRestarts
+  oplogFetcherSteadyStateMaxFetcherRestarts
+  oplogFetcherUsesExhaust
+  oplogInitialFindMaxSeconds
+  oplogNetworkTimeoutBufferSeconds
+  oplogRetriedFindMaxSeconds
+  oplogSamplingLogIntervalSeconds
+  oplogTruncationPointSizeMB
+  opportunisticSecondaryTargeting
+  orphanCleanupDelaySecs
+  periodicNoopIntervalSecs
+  planCacheSize
+  priorityTakeoverFreshnessWindowSeconds
+  processUmask
+  profileOperationResourceConsumptionMetrics
+  quiet
+  rangeDeleterBatchDelayMS
+  rangeDeleterBatchSize
+  readHedgingMode
+  receiveChunkWaitForRangeDeleterTimeoutMS
+  recoverFromOplogAsStandalone
+  recoverToOplogTimestamp
+  remainingReshardingOperationTimeThresholdMillis
+  replBatchLimitBytes
+  replBatchLimitOperations
+  replElectionTimeoutOffsetLimitFraction
+  replWriterMinThreadCount
+  replWriterThreadCount
+  replicaSetMonitorProtocol
+  reportOpWriteConcernCountersInServerStatus
+  requireApiVersion
+  reservedServiceExecutorRecursionLimit
+  reshardingCollectionClonerBatchSizeInBytes
+  reshardingCoordinatorServiceMaxThreadCount
+  reshardingCriticalSectionTimeoutMillis
+  reshardingDonorServiceMaxThreadCount
+  reshardingMinimumOperationDurationMillis
+  reshardingOplogApplierMaxLockRequestTimeoutMillis
+  reshardingOplogBatchLimitBytes
+  reshardingOplogBatchLimitOperations
+  reshardingOplogBatchTaskCount
+  reshardingRecipientServiceMaxThreadCount
+  reshardingTxnClonerProgressBatchSize
+  resumableIndexBuildMajorityOpTimeTimeoutMillis
+  rewriteStateChangeErrors
+  roleGraphInvalidationIsFatal
+  rollbackRemoteOplogQueryBatchSize
+  rollbackTimeLimitSecs
+  roundtripBsonColumnOnValidate
+  routingTableCacheChunkBucketSize
+  saslHostName
+  saslServiceName
+  saslauthdPath
+  scramIterationCount
+  scramSHA256IterationCount
+  scriptingEngineInterruptIntervalMS
+  shardSplitGarbageCollectionDelayMS
+  shardSplitTimeoutMS
+  shardedIndexConsistencyCheckIntervalMS
+  shutdownTimeoutMillisForSignaledShutdown
+  skipCorruptDocumentsWhenCloning
+  skipShardingConfigurationChecks
+  skipShellCursorFinalize
+  sslMode
+  sslWithholdClientCertificate
+  startupAuthSchemaValidation
+  startupRecoveryForRestore
+  storageEngineConcurrentReadTransactions
+  storageEngineConcurrentWriteTransactions
+  storageEngineQueueingPolicy
+  storageGlobalParams.directoryperdb
+  storeFindAndModifyImagesInSideCollection
+  supportArbitraryClusterKeyIndex
+  suppressNetworkInterfaceTransportLayerExceptions
+  suppressNoTLSPeerCertificateWarning
+  syncdelay
+  synchronousServiceExecutorRecursionLimit
+  takeUnstableCheckpointOnShutdown
+  taskExecutorPoolSize
+  tcmallocAggressiveMemoryDecommit
+  tcmallocEnableMarkThreadTemporarilyIdle
+  tcmallocMaxTotalThreadCacheBytes
+  tcmallocReleaseRate
+  tcpFastOpenClient
+  tcpFastOpenQueueSize
+  tcpFastOpenServer
+  temporarilyUnavailableBackoffBaseMs
+  temporarilyUnavailableMaxRetries
+  tenantApplierBatchSizeBytes
+  tenantApplierBatchSizeOps
+  tenantApplierThreadCount
+  tenantMigrationBlockingStateTimeoutMS
+  tenantMigrationDisableX509Auth
+  tenantMigrationExcludeDonorHostTimeoutMS
+  tenantMigrationExternalKeysRemovalBufferSecs
+  tenantMigrationGarbageCollectionDelayMS
+  tenantMigrationOplogBufferPeekCacheSize
+  tenantMigrationOplogFetcherBatchSize
+  testingDiagnosticsEnabled
+  testingSnapshotBehaviorInIsolation
+  timeseriesBucketMaxCount
+  timeseriesBucketMaxSize
+  timeseriesIdleBucketExpiryMaxCountPerAttempt
+  timeseriesIdleBucketExpiryMemoryUsageThreshold
+  timeseriesInsertMaxRetriesOnDuplicates
+  timeseriesValidateCompressedBuckets
+  tlsCATrusts
+  tlsMode
+  tlsOCSPSlowResponderWarningSecs
+  tlsOCSPStaplingTimeoutSecs
+  tlsOCSPVerifyTimeoutSecs
+  tlsWithholdClientCertificate
+  tlsX509ClusterAuthDNOverride
+  tlsX509ExpirationWarningThresholdDays
+  totalUnitWriteSizeBytes
+  traceExceptions
+  traceWriteConflictExceptions
+  trafficRecordingDirectory
+  transactionLifetimeLimitSeconds
+  transactionSizeLimitBytes
+  transactionTooLargeForCacheThreshold
+  ttlMonitorEnabled
+  ttlMonitorSleepSecs
+  unsupportedSyncSource
+  useReadOnceCursorsForIndexBuilds
+  waitForSecondaryBeforeNoopWriteMS
+  warmMinConnectionsInShardingTaskExecutorPoolOnStartup
+  warmMinConnectionsInShardingTaskExecutorPoolOnStartupWaitMS
+  watchdogPeriodSeconds
+  wiredTigerConcurrentReadTransactions
+  wiredTigerConcurrentWriteTransactions
+  wiredTigerCursorCacheSize
+  wiredTigerDirectoryForIndexes
+  wiredTigerEngineRuntimeConfig
+  wiredTigerEvictionDirtyMaxGB
+  wiredTigerEvictionDirtyTargetGB
+  wiredTigerFileHandleCloseIdleTime
+  wiredTigerFileHandleCloseMinimum
+  wiredTigerFileHandleCloseScanInterval
+  wiredTigerMaxCacheOverflowSizeGB
+  wiredTigerSessionCloseIdleTimeSecs
+  wiredTigerSkipTableLoggingChecksOnStartup
+  wiredTigerStressConfig
+  writePeriodicNoops
+
+
+setProfilingFilterGlobally:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+updates a global filter that determines which operations are eligible for logging/profiling
+
+setShardVersion:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+internal
+
+setUserWriteBlockMode:  requiresAuth apiVersions deprecatedApiVersions
+Set whether user write blocking is enabled
+
+shardingState:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+no help defined
+
+shutdown:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+Shuts down the database. Must be run against the admin database and either (1) run from localhost or (2) run while authenticated with the shutdown privilege. If the node is the primary of a replica set, waits up to 'timeoutSecs' for an electable node to be caught up before stepping down. If 'force' is false and no electable node was able to catch up, does not shut down. If the node is in state SECONDARY after the attempted stepdown, any remaining time in 'timeout' is used for quiesce mode, where the database continues to allow operations to run, but directs clients to route new operations to other replica set members.
+
+splitChunk:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+internal command usage only
+example:
+ { splitChunk:"db.foo" , keyPattern: {a:1} , min : {a:100} , max: {a:200} { splitKeys : [ {a:150} , ... ], fromChunkSplitter: <bool>}
+
+splitVector:  requiresAuth apiVersions deprecatedApiVersions
+Internal command.
+examples:
+  { splitVector : "blog.post" , keyPattern:{x:1} , min:{x:10} , max:{x:20}, maxChunkSize:200 }
+  maxChunkSize unit in MBs
+  May optionally specify 'maxSplitPoints' and 'maxChunkObjects' to avoid traversing the whole chunk
+
+  { splitVector : "blog.post" , keyPattern:{x:1} , min:{x:10} , max:{x:20}, force: true }
+  'force' will produce one split point even if data is small; defaults to false
+NOTE: This command may take a while to run
+
+startRecordingTraffic:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+no help defined
+
+startSession:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+start a logical session
+
+stopRecordingTraffic:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+no help defined
+
+top:  requiresAuth secondaryOk adminOnly apiVersions deprecatedApiVersions
+usage by collection, in micros
+
+update:  requiresAuth apiVersions deprecatedApiVersions
+update documents
+
+updateRole:  requiresAuth apiVersions deprecatedApiVersions
+no help defined
+
+updateUser:  requiresAuth apiVersions deprecatedApiVersions
+no help defined
+
+usersInfo:  requiresAuth secondaryOverrideOk apiVersions deprecatedApiVersions
+no help defined
+
+validate:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+Validate contents of a namespace by scanning its data structures for correctness.
+This is a slow operation.
+	Add {full: true} option to do a more thorough check.
+	Add {background: true} to validate in the background.
+	Add {repair: true} to run repair mode.
+Cannot specify both {full: true, background: true}.
+
+validateDBMetadata:  requiresAuth secondaryOk apiVersions deprecatedApiVersions
+validateDBMetadata checks that the stored metadata of a database/collection is valid within a particular API version. If 'db' parameter is specified, only runs validation against that database, if not the validation will be run againt all dbs. Similarly if 'collection' parameter is specified, the validation is only run against that collection, if not the validation is run against all collections.
+
+voteCommitIndexBuild:  requiresAuth adminOnly apiVersions deprecatedApiVersions
+Internal intra replica set command
+
+waitForFailPoint:  secondaryOk adminOnly apiVersions deprecatedApiVersions
+wait for a fail point to be entered a certain number of times
+
+whatsmyuri:  secondaryOk apiVersions deprecatedApiVersions
+{whatsmyuri:1}
+sn

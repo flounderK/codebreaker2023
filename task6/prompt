@@ -1,0 +1,15 @@
+Task 6 - Follow the Data Part 2 - (Forensics, Databases, Exploitation)Points: 800
+While you were working, we found the small U.S. cellular provider which issued the SIM card recovered from the device: Blue Horizon Mobile.
+
+As advised by NSA legal counsel we reached out to notify them of a possible compromise and shared the IP address you discovered. Our analysts explained that sophisticated cyber threat actors may use co-opted servers to exfiltrate data and Blue Horizon Mobile confirmed that the IP address is for an old unused database server in their internal network. It was unmaintained and (unfortunately) reachable by any device in their network.
+
+We believe the threat actor is using the server as a "dead drop", and it is the only lead we have to find them. Blue Horizon has agreed to give you limited access to this server on their internal network via an SSH "jumpbox". They will also be sure not to make any other changes that might tip off the actor. They have given you the authority to access the system, but unfortunately they could not find credentials. So you only have access to the database directly on TCP port 27017
+
+Use information from the device firmware, and (below) SSH jumpbox location and credentials to login to the database via an SSH tunnel and discover the IP address of the system picking up a dead drop. Be patient as the actor probably only checks the dead drop periodically. Note the jumpbox IP is 100.127.0.2 so don't report yourself by mistake
+
+
+Downloads:
+
+SSH host key to authenticate the jumpbox (optional) (jumpbox-ssh_host_ecdsa_key.pub)
+SSH private key to authenticate to the jumpbox: user@external-support.bluehorizonmobile.com on TCP port 22 (jumpbox.key)
+Enter the IP address (don't guess)

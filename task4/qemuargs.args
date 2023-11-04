@@ -1,0 +1,2 @@
+
+qemu-system-aarch64 -cpu cortex-a53 -machine virt -kernel kernel8.img -dtb bcm2710-rpi-3-b-plus.dtb.mod -usb -device usb-ehci,id=ehci -device usb-storage,drive=myusbdrive,id=ehci.0 -drive id=myusbdrive,if=none,format=raw,file=usb.img -device sdhci-pci -device sd-card,drive=sdcarddrive -drive id=sdcarddrive,if=none,format=raw,file=sd.img

@@ -1,0 +1,22 @@
+#!/bin/sh
+
+DIR=/agent
+PROC=agent
+RESTART_FILE=agent_restart
+
+# start the navigation service
+/bin/nav
+
+mkdir -p /tmp/upload
+dmesg > /tmp/upload/boot_log_`date -Iseconds`
+
+# start agent and restart if it exists
+while [ 1 ]; do
+    if [ ! -e $DIR/$RESTART_FILE ]; then
+        break
+    fi
+    if [ -z "`ps -o comm | egrep ^${PROC}$`" ]; then
+        $DIR/$PROC $DIR/config
+    fi
+    sleep 10
+done

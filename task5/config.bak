@@ -1,0 +1,25 @@
+logfile = "/tmp/log.txt"
+
+# levels 0 (trace) - 5 (fatal)
+loglevel = 1
+
+daemonize = true
+
+id_file = "/private/id.txt"
+ssh_priv_key = "/private/id_ed25519"
+priv_key = "/private/ecc_p256_private.bin"
+
+cmd_host = "0.0.0.0"
+cmd_port = 9000
+
+collectors_usb = [ "/dev/ttyUSB0", "/dev/ttyUSB1" ]
+collectors_ipc = [ "/tmp/c1.unix", "/tmp/c2.unix" ]
+collect_enabled = true
+dropper_exe = "/agent/dropper"
+dropper_config = "/tmp/dropper.yaml"
+dropper_dir = "/tmp/upload"
+
+navigate_ipc = "/tmp/nav_service.unix"
+
+key_file = "/agent/hmac_key"
+restart_flag = "/agent/agent_restart"

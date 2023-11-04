@@ -1,0 +1,22 @@
+
+Find the correct processor datasheet, and then use it and the resources provided to enter which physical pins enable data to and from this device
+
+Hints:
+
+The pinout.svg has two voltage types. The gold/tan is 3.3v, the red is 5v.
+The only additional resource you will need is the datasheet, or at least the relevant information from it
+
+
+BCM2837 arm in ALT5 function mode
+
+GPIO
+14, 32, and 40 are UART TXD1
+15, 33, and 41 are UART RXD1
+(14 & 15) (32 & 33) (40 & 41) are UART TXD1 RXD1 in ALT5
+
+
+Provide the correct physical pin number to power the GPIO header: P17
+Provide a correct physical pin number to ground the board: P14
+Provide the correct physical pin number for a UART transmit function: P37
+Provide the correct physical pin number for a UART receive function: P38
+

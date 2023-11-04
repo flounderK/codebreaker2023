@@ -1,0 +1,15 @@
+***********************************************************
+*                                                                  *
+*                  Operation PITS Boot-up Banner                   *
+*                                                                  *
+********************************************************************
+device name: 
+Model: XYZ-1234
+Firmware Version: 1.0.0
+Boot Time: 1970-01-01 00:00:00
+Initializing collector...
+Loading configuration...
+Starting services...
+Booting up...
+Collector is online.
+Alternative Function Assignment  :  ALT5

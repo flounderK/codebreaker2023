@@ -17,4 +17,14 @@ ofb = AES.new(key, AES.MODE_OFB, iv=second_iv)
 ciph_2 = ofb.encrypt(plaintext)
 assert ciph_2 == known_ciphertext_2
 
-print("matched")
+print("ofb matched with forced reset")
+
+ctr = AES.new(key, AES.MODE_CTR, initial_value=iv, nonce=b'')
+
+ctr_ciph_1 = ctr.encrypt(plaintext)
+assert ctr_ciph_1 == known_ciphertext
+
+ctr_ciph_2 = ctr.encrypt(plaintext)
+assert ctr_ciph_2 == known_ciphertext_2
+
+print("ctr matched")

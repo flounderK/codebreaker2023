@@ -51,6 +51,13 @@ AES Encrypted buffer
 ```
 
 
+ecc_p256_public.bin
+```
+00000000: 894d 6341 662a 70e3 d4f8 467c 9b25 7bbc  .McAf*p...F|.%{.
+00000010: 0ff2 f558 a241 6335 c7d4 8845 532c 8ca6  ...X.Ac5...ES,..
+00000020: e172 6175 fb50 ef22 8aa6 55a2 3793 4b8b  .rau.P."..U.7.K.
+00000030: 2969 912d 7f29 118d 8b64 bf2d 73f8 d5b8  )i.-.)...d.-s...
+```
 
 - ecc_p256_private.bin is 0x60 bytes
 - hmac key is 0x40 bytes
@@ -64,6 +71,7 @@ AES Encrypted buffer
 
 
 # Packet structure
+After looking at the command handler functions it is pretty clear that this is the structure of the command payload:
 ```
 // size 0x60
 struct CommandHeader {
@@ -161,7 +169,7 @@ This flow means that the hmac key is technically brute force-able without having
 remaining candidates for crypto weaknesses in this:
 - points specified for the ecc might not be diverse enough. It looks like the point specified in the private key might be passed in twice, which seems... unwise
 - I have not fully reversed the code, but based on the fact that the ecc code is calling a `random` equivalent and nist p256 appears to normally be meant for key exchanges, i think it might be possible that the ecc code is performing a "key exchange" all locally. If this is the case then there is a major weakness in the encryption
-- it looks like the aes key that is output from ecc decryption isn't entirely used (as in, some portions of the 32 bytes are zeroed out before being used, which would reduce keyspace somewhat).
+- it looks like the aes key that is output from ecc decryption isn't entirely used (as in, some portions of the 32 bytes are zeroed out before being used, which would reduce keyspace somewhat). update, looks like it is just using aes-128 so this is fine
 
 After looking online at a basic aes implementation (https://github.com/kokke/tiny-AES-c/tree/master), it looks like the expanded key size for aes 128 is 176 bytes and the key length is 16 bytes, which matches what I see in `agent`.
 
@@ -186,7 +194,7 @@ After looking online at a basic aes implementation (https://github.com/kokke/tin
 - OFB - matched initially on a live test, current best candidate, but pycryptodome doesn't match after the first run, so a whole new instance needs to be created with the updated IV every time
 - CTR - uses outer loop, and increments a value in its IV every time, could very easily be this. Confirmed, This works, it just needs very specific arguments in pycryptodome
 
-**CTR**
+**AES is 128 bit in CTR mode**
 
 ### Remaining Candidate modes
 - CBC - uses outer loop - did not match on initial test

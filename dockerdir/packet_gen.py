@@ -3,6 +3,8 @@ import hashlib
 from hashlib import sha256
 from Crypto.Cipher import AES
 from pwn import *
+import argparse
+import functools
 
 log = logging.getLogger(__file__)
 if not log.hasHandlers():
@@ -96,35 +98,6 @@ V
 compared with hmac at 0x40 in packet
 """
 
-known_command_args_bytes = bytes.fromhex("""
-13e3 e16c ba4a 9fae 2fed 2ec1 f21a c43e
-287f 074c 3ae8 21df f265 78ad 06ff 735e
-a849 5aad b061 dfed dd0b 5fe9 a0d3 82f7
-c03b 0257 93d6 85c8 e4f6 8c2f e394 8fa1
-e750 f122 4bc9 ba70 c465 3685 de30 a980
-747f 53e8 8c8c 7c9c eefc ea48 5c34 83cc
-8b6a 65fc 074b 2240 c141 fdf3 d210 5d4c
-a52d a6c9 aa37 7f91 72ce d1ef 291a 8772
-b842 8256 5e68 4917 47c8 1538 7082 4746
-5143 92f0 52d1 df61 e445 22b3 9b3a bf5a
-e247 8a30 1e9d 2a5c f2f5 58a5 94fc 8ac5
-32b0 76ea 4ba6 99ac d229 7df1 ad8c 07d7
-""")
-
-cleartext_data = bytes.fromhex('''ba46 1296 20f9 1e37 42af e650 cee2 7b8d
-9e81 804f 081e 254d 686e 9577 72d2 3e23
-6cb1 00e3 f74e 6cf5 76f0 5d4d 4a58 3e50
-ef6e 8b00 c450 5e93 baaf 92d2 1a00 9b6d
-711f 70a3 bfb6 18fe 71bc 1729 e04b 318d
-f7f2 1875 e437 eebe 5b58 5643 88bf 444d
-2769 3f48 fba7 8e3a 2866 d902 4c83 1203
-a59c f8b5 db71 7f03 881c 9ea2 22bc e178
-fa5c f9ca 0bbc 1b2a 0caf 67ea ac95 38be
-b233 9658 f86f 6504 a0a5 cd3c 672d 2398
-f16f 6e7d f867 51e1 c008 d792 c068 9dae
-7db1 cc16 9179 1a4a a471 c1b6 288a ef09
-''')
-
 
 class PacketGenerator:
     def __init__(self, hmac_key_bytes=b''):
@@ -151,6 +124,7 @@ class PacketGenerator:
         log.debug("command struct")
         log.debug("%s", hexdump_str(command_struct_bytes))
         log.debug("")
+        return command_struct_bytes
 
 
     def encrypt_command_struct(self, key, iv):
@@ -216,9 +190,17 @@ class PacketGenerator:
         return s2.digest()
 
 
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("command_type", type=functools.partial(int, base=0),
+                        help="command type")
 
-hmac_str = b'secret_key_91579'
+    parser.add_argument("nargs", type=functools.partial(int, base=0),
+                        help="number of arguments")
+    args = parser.parse_args()
 
-pg = PacketGenerator(hmac_str)
-packet = pg.gen_packet(-1, 0)
-print(hexdump_str(packet))
+    hmac_str = b'secret_key_91579'
+
+    pg = PacketGenerator(hmac_str)
+    packet = pg.gen_packet(args.command_type, args.nargs)
+    print(hexdump_str(packet))

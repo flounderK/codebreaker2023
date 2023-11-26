@@ -533,7 +533,10 @@ xoring the plaintext with the key buffer extracted earlier. There is however a l
 size of packet that can be generated, as only as much key as is available in the second-largest
 packet will actually yield anything unless I can determine the plaintext contents of the rest of
 packet 3's command. Regardless of this limitation, the buffer extracted so far is enough space
-to fit any command except for the one that starts `diagclient`, so it should be plenty for now.
+to fit any command except for the one that starts `diagclient`, the one that
+sends a message to navigation, and the one to change collectors, so it should be plenty for now.
+Those commands can still be called, I just don't actually have control over the arguments
+past argument 2.
 
 
 # Finding a command to shut off the device

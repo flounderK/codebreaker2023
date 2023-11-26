@@ -1,0 +1,383 @@
+unset env LINES
+unset env COLUMNS
+set height 0
+set width 0
+
+set architecture aarch64
+set pagination off
+
+file agent
+
+set $PTR_SIZE = 8
+set $UINT_SIZE = 4
+
+set $BINBASE = 0x0
+
+
+set $random_func_ptr = $BINBASE + 0x04e7048
+
+source pyextension.py
+
+set $RECVBUF_ADDR = 0x0
+
+set $COMMAND_TYPE_STRUCT = 0
+
+set $BP_do_message_authentication = $BINBASE + 0x00402284
+b *$BP_do_message_authentication
+set $BP_do_message_authentication_bpnum = $bpnum
+commands
+silent
+info proc mappings
+printf "starting do_message_authentication\n"
+printf "command_type_struct: %p\n", $x0
+set $COMMAND_TYPE_STRUCT = $x0
+# x/20ag $x0
+hexdumpbuf $x0 0xa0
+printf "recvd_buf: %p\n", $x2
+# x/36ag $x2
+hexdumpbuf $x2 288
+set $RECVBUF_ADDR = $x2
+printf "ecc_private_key_buf: %p\n", $x4
+# x/12ag $x4
+hexdumpbuf $x4 0x60
+printf "hmac_key_buf: %p\n", $x5
+# x/8ag $x5
+hexdumpbuf $x5 0x40
+# printf "%s", *(char**)($PRINTLOC+8)
+# set *(int*)$random_func_ptr = 0
+cont
+end
+
+
+set $BP_sha256_ctx_init = $BINBASE + 0x0040b790
+b *$BP_sha256_ctx_init
+set $BP_sha256_ctx_init_bpnum = $bpnum
+commands
+silent
+printf "SHA256_ctx_Init %p\n", $x0
+cont
+end
+
+set $SHA_RESBUF = 0x0
+
+set $BP_sha256_final = $BINBASE + 0x0040b8b4
+b *$BP_sha256_final
+set $BP_sha256_final_bpnum = $bpnum
+commands
+silent
+printf "SHA256_ctx_final %p\n", $x1
+set $SHA_RESBUF = $x0
+cont
+end
+
+set $BP_sha256_final_ret = $BINBASE + 0x0040b9b0
+b *$BP_sha256_final_ret
+set $BP_sha256_final_ret_bpnum = $bpnum
+commands
+silent
+printf "SHA256_ctx_final_ret\n"
+printbufinhex $SHA_RESBUF 0x20
+printf "\n"
+
+cont
+end
+
+set $ECC_OUTBUF = 0
+
+set $BP_ecc_decrypt = $BINBASE + 0x0040b8b4
+b *$BP_ecc_decrypt
+set $BP_ecc_decrypt_bpnum = $bpnum
+commands
+silent
+printf "ecc_decrypt\n"
+set $ECC_OUTBUF = $x2
+cont
+end
+
+set $BP_ecc_decrypt_after_ret = $BINBASE + 0x004022f0
+b *$BP_ecc_decrypt_after_ret
+set $BP_ecc_decrypt_after_ret_bpnum = $bpnum
+commands
+silent
+printf "ecc_decrypt_after_ret\n"
+cont
+end
+
+# set $BP_call_unk_funcptr = $BINBASE + 0x00409ed4
+# b *$BP_call_unk_funcptr
+# set $BP_call_unk_funcptr_bpnum = $bpnum
+# commands
+# silent
+# printf "unk func ptr %p\n", $x2
+# cont
+# end
+
+set $BP_calls_custom_random_func = $BINBASE + 0x0040ae34
+b *$BP_calls_custom_random_func
+set $BP_calls_custom_random_func_bpnum = $bpnum
+commands
+silent
+printf "calls_custom_random_func\n"
+cont
+end
+
+
+set $BUF_REVERSE_VAL = 0
+set $BUF_REVERSE_SIZE = 0
+
+set $BP_buf_reverse = $BINBASE + 0x0040adb8
+b *$BP_buf_reverse
+set $BP_buf_reverse_bpnum = $bpnum
+commands
+silent
+set $BUF_REVERSE_VAL = $x0
+set $BUF_REVERSE_SIZE = $x2
+printf "buf_reverse, size %d\n", $BUF_REVERSE_SIZE
+cont
+end
+
+set $BP_buf_reverse_ret = $BINBASE + 0x0040ae00
+b *$BP_buf_reverse_ret
+set $BP_buf_reverse_ret_bpnum = $bpnum
+commands
+silent
+printf "buf_reverse_ret\n"
+# x/32bx $BUF_REVERSE_VAL
+# hexdumpbuf $BUF_REVERSE_VAL $BUF_REVERSE_SIZE
+hexdumpbuf $BUF_REVERSE_VAL $BUF_REVERSE_SIZE+16
+cont
+end
+
+set $BP_maybe_table_lookup = $BINBASE + 0x0040ac44
+b *$BP_maybe_table_lookup
+set $BP_maybe_table_lookup_bpnum = $bpnum
+commands
+silent
+printf "maybe_table_lookup "
+cont
+end
+
+disable $BP_maybe_table_lookup_bpnum
+
+set $BP_maybe_table_lookup_ret = $BINBASE + 0x0040acbc
+b *$BP_maybe_table_lookup_ret
+set $BP_maybe_table_lookup_ret_bpnum = $bpnum
+commands
+silent
+printf "maybe_table_lookup ret %d\n", $x0
+cont
+end
+
+
+set $SHA_CTX_FROM_UPDATE = 0
+
+set $BP_SHA256_update = $BINBASE + 0x0040b818
+b *$BP_SHA256_update
+set $BP_SHA256_update_bpnum = $bpnum
+commands
+silent
+printf "SHA256_update %p %x\n", $x0, $x2
+hexdumpbuf $x1 $x2
+set $SHA_CTX_FROM_UPDATE = $x1
+# printbufinhex $x1 $x2
+cont
+end
+
+set $CMP_HASH_BUF_CALC = 0x0
+
+set $BP_sketchy_buffer_manip = $BINBASE + 0x0040b270
+b *$BP_sketchy_buffer_manip
+set $BP_sketchy_buffer_manip_bpnum = $bpnum
+commands
+silent
+printf "sketchy_buffer_manip\n"
+# if this actually matters, part of the key is literally pointers on the heap
+# printf "buf 0x70\n"
+# hexdumpbuf $x0 32
+printf "inbuf\n"
+hexdumpbuf $x1 $x2
+cont
+end
+
+
+set $BP_sha256_finalize_cmd_type_struct_hash_and_hash_with_other_buf = $BINBASE + 0x0040b4bc
+b *$BP_sha256_finalize_cmd_type_struct_hash_and_hash_with_other_buf
+set $BP_sha256_finalize_cmd_type_struct_hash_and_hash_with_other_buf_bpnum = $bpnum
+commands
+silent
+printf "sha256_finalize_cmd_type_struct_hash_and_hash_with_other_buf\n"
+# x/40bx $x0
+printbufinhex $x0 0x20
+printf "\n"
+set $CMP_HASH_BUF_CALC = $x0
+cont
+end
+
+set $BP_after_sha_finalize_cmd_type_struct_hash = $BINBASE + 0x00402404
+b *$BP_after_sha_finalize_cmd_type_struct_hash
+set $BP_after_sha_finalize_cmd_type_struct_hash_bpnum = $bpnum
+commands
+silent
+printf "after_sha_finalize_cmd_type_struct_hash \n"
+printf "Calculated buf\n"
+hexdumpbuf $CMP_HASH_BUF_CALC 0x20
+printf "Original recvbuf+0x40\n"
+hexdumpbuf $RECVBUF_ADDR+0x40 0x20
+
+cont
+end
+
+
+set $BP_SHA256_update_ret = $BINBASE + 0x0040b868
+b *$BP_SHA256_update_ret
+set $BP_SHA256_update_ret_bpnum = $bpnum
+commands
+silent
+printf "SHA256_update_ret\n"
+hexdumpbuf $SHA_CTX_FROM_UPDATE+0x28 0x40
+# printbufinhex $x1 $x2
+cont
+end
+
+# output isn't actually useful
+disable $BP_SHA256_update_ret_bpnum
+
+
+funcargsbp do_message_authentication_ret 0x0401520 "${BPNAME} %p\n", $x0
+
+# funcargsbp aes_decrypt 0x00408fa4
+
+funcargsbp sha256_plux_mixup 0x0040b358
+
+set $BP_aes_decrypt = $BINBASE + 0x00408fa4
+b *$BP_aes_decrypt
+set $BP_aes_decrypt_bpnum = $bpnum
+commands
+silent
+printf "aes_decrypt\n"
+printf "%p %p %p %p %p %p\n", $x0, $x1, $x2, $x3, $x4, $x5
+printf "encrypted buffer\n"
+hexdumpbuf $x2 0xc0
+printf "IV\n"
+hexdumpbuf $x4 0x10
+printf "expanded key buf\n"
+hexdumpbuf $x5 0xb0
+cont
+end
+
+
+set $BIGNUM_CALC_BUF = 0
+set $BP_likely_bignum_conversion_or_calculation_004094b0 = $BINBASE + 0x004094b0
+b *$BP_likely_bignum_conversion_or_calculation_004094b0
+set $BP_likely_bignum_conversion_or_calculation_004094b0_bpnum = $bpnum
+commands
+silent
+printf "likely_bignum_conversion_or_calculation_004094b0\n"
+hexdumpbuf $x1 32
+printf "curve params\n"
+hexdumpbuf $x2 32
+set $BIGNUM_CALC_BUF = $x0
+cont
+end
+disable $BP_likely_bignum_conversion_or_calculation_004094b0_bpnum
+
+set $BP_likely_bignum_conversion_or_calculation_004094b0_ret = $BINBASE + 0x0004094cc
+b *$BP_likely_bignum_conversion_or_calculation_004094b0_ret
+set $BP_likely_bignum_conversion_or_calculation_004094b0_ret_bpnum = $bpnum
+commands
+silent
+printf "likely_bignum_conversion_or_calculation_004094b0_ret\n"
+hexdumpbuf $BIGNUM_CALC_BUF 32
+cont
+end
+disable $BP_likely_bignum_conversion_or_calculation_004094b0_ret_bpnum
+
+
+set $BP_AES_KEY_EXPANSION = $BINBASE + 0x0408d1c
+b *$BP_AES_KEY_EXPANSION
+set $BP_AES_KEY_EXPANSION_bpnum = $bpnum
+commands
+silent
+printf "AES_KEY_EXPANSION\n"
+hexdumpbuf $x1 32
+set $AES_KEY_EXPANSION_OUTBUF = $x0
+cont
+end
+
+set $BP_AES_KEY_EXPANSION_ret = $BINBASE + 0x00408e34
+b *$BP_AES_KEY_EXPANSION_ret
+set $BP_AES_KEY_EXPANSION_ret_bpnum = $bpnum
+commands
+silent
+printf "AES_KEY_EXPANSION_ret\n"
+hexdumpbuf $AES_KEY_EXPANSION_OUTBUF 176
+cont
+end
+
+
+set $BP_custom_random = $BINBASE + 0x0040b1c0
+b *$BP_custom_random
+set $BP_custom_random_bpnum = $bpnum
+commands
+silent
+printf "custom_random\n"
+# bt
+set $RANDOM_OUTBUF = $x0
+cont
+end
+
+set $BP_custom_random_ret = $BINBASE + 0x0040b1f0
+b *$BP_custom_random_ret
+set $BP_custom_random_ret_bpnum = $bpnum
+commands
+silent
+printf "custom_random_ret\n"
+hexdumpbuf $RANDOM_OUTBUF 32
+cont
+end
+
+
+set $BP_handle_commands = $BINBASE + 0x0401190
+b *$BP_handle_commands
+set $BP_handle_commands_bpnum = $bpnum
+commands
+silent
+printf "handle_commands\n"
+cont
+end
+
+
+set $CURRENT_AES_KEY = 0
+
+set $BP_AES_decrypt_block = $BINBASE + 0x00408e38
+b *$BP_AES_decrypt_block
+set $BP_AES_decrypt_block_bpnum = $bpnum
+commands
+silent
+printf "AES_decrypt_block state\n"
+set $CURRENT_AES_KEY = $x0
+hexdumpbuf $x1 16
+cont
+end
+
+
+
+set $BP_AES_decrypt_block_ret = $BINBASE + 0x00409078
+b *$BP_AES_decrypt_block_ret
+set $BP_AES_decrypt_block_ret_bpnum = $bpnum
+commands
+silent
+printf "AES_decrypt_block_ret \n"
+hexdumpbuf $CURRENT_AES_KEY 16
+printf "command_type_struct \n"
+hexdumpbuf $COMMAND_TYPE_STRUCT 0xc0
+
+cont
+end
+
+
+
+target remote 10.101.255.254:1234
+printf "READY\n"
+cont
+

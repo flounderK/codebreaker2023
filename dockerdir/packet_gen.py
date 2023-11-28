@@ -99,17 +99,35 @@ compared with hmac at 0x40 in packet
 """
 
 
+T9_ENCRYPTION_KEY = bytes.fromhex("""
+46d6 5acd cf89 ca68 a28e 4431 4b22 9ed0
+36df 20ad 07b1 fc90 9b63 92df e98b 4054
+3157 4da8 5e0d 98f1 a099 a996 37d4 1911
+1b0e 79f8 4621 67ae a2f0 01eb a278 4c1b
+264f 95f1 507e d948 68da 697a 6575 6839
+08dd 96a0 64a0 783e 2fe0 65af 18a1 020c
+e1d8 86d3 1199 2af6 38e0 0945 bcf9 9fe1
+e800 7d6a b719 e569 6b53 5f85 9326 7a0b
+0b85 1581 f888 e0e8 9e48 cef1 8fb1 5525
+072c 3c42 e6a4 f4f1 52f6 f7c5 4e68 7f75
+7b29 0a29 f0f9 71b1 c501 b97a 169a ee06
+7a4e 1ff8 5a08 3853 4832 c3a9 5744 2d85
+98f4 7022 048f 58d5 306b 9dea c34f 92d8
+b948 8081 5870 96d5 6084 6caf 2e17 ff43
+58ac 91d5 9f75 018d d868 10fa 21c1 940c
+27cc d781 c4ec 3a93 bf6f c40e 44a0 91f2
+""")
+
+
 class PacketGenerator:
-    def __init__(self, hmac_key_bytes=b''):
+    def __init__(self, hmac_key_bytes, ecc_section_bytes, shared_secret=None, aes_key_buffer=None):
         self.hmac_key_bytes = hmac_key_bytes
         self._aes_cipher = None
         self._command_struct = None
 
-        with open("ecc_p256_public.bin", "rb") as f:
-            self.shared_secret = f.read()[:32]
-
-        with open("packet_data.bin", "rb") as f:
-            self.ecc_section_bytes = f.read()[:64]
+        self.shared_secret = shared_secret
+        self.ecc_section_bytes = ecc_section_bytes
+        self.aes_key_buffer = aes_key_buffer
 
 
     def gen_command_struct_bytes(self, command_type_int, nargs_int, args=None):
@@ -126,8 +144,12 @@ class PacketGenerator:
         log.debug("")
         return command_struct_bytes
 
-
-    def encrypt_command_struct(self, key, iv):
+    def encrypt_command_struct(self, key=None, iv=None):
+        # TODO: this is horrible
+        if (key is None or (iv is None)) and self.shared_secret is not None:
+            key, iv = self.gen_aes_key_and_iv()
+        elif self.aes_key_buffer is not None:
+            return xor(self._command_struct, self.aes_key_buffer)
         log.debug("key=%s iv=%s", str(key), str(iv))
         ctr = AES.new(key, AES.MODE_CTR, initial_value=iv, nonce=b'')
         encrypted = ctr.encrypt(self._command_struct)
@@ -136,15 +158,18 @@ class PacketGenerator:
     def gen_ecc_section(self):
         return self.ecc_section_bytes
 
-    def gen_packet(self, command_type_int, nargs_int, args=None):
-        self.gen_command_struct_bytes(command_type_int, nargs_int, args)
-        hmac_hash = self.gen_hmac_hash()
+    def gen_aes_key_and_iv(self):
         shasum = sha256()
         shasum.update(self.shared_secret)
         shasum_digest_bytes = shasum.digest()
         aes_key = shasum_digest_bytes[:16]
         iv = shasum_digest_bytes[16:24] + b'\x00'*7 + b'\x01'
-        encrypted_command_struct = self.encrypt_command_struct(aes_key, iv)
+        return aes_key, iv
+
+    def gen_packet(self, command_type_int, nargs_int, args=None):
+        self.gen_command_struct_bytes(command_type_int, nargs_int, args)
+        hmac_hash = self.gen_hmac_hash()
+        encrypted_command_struct = self.encrypt_command_struct()
 
         ecc_section_bytes = self.gen_ecc_section()
         packet = b''.join([ecc_section_bytes, hmac_hash,
@@ -192,15 +217,28 @@ class PacketGenerator:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("--debug", action="store_true", default=False)
     parser.add_argument("command_type", type=functools.partial(int, base=0),
                         help="command type")
 
     parser.add_argument("nargs", type=functools.partial(int, base=0),
                         help="number of arguments")
+    parser.add_argument("args", type=str, nargs=argparse.REMAINDER)
     args = parser.parse_args()
+    if args.debug is True:
+        log.setLevel(logging.DEBUG)
+        log.debug("args %s", str(args))
+
+    args.args = [i.encode() for i in args.args]
 
     hmac_str = b'secret_key_91579'
 
-    pg = PacketGenerator(hmac_str)
-    packet = pg.gen_packet(args.command_type, args.nargs)
+    with open("ecc_p256_public.bin", "rb") as f:
+        shared_secret = f.read()[:32]
+
+    with open("packet_data.bin", "rb") as f:
+        ecc_section_bytes = f.read()[:64]
+
+    pg = PacketGenerator(hmac_str, ecc_section_bytes, shared_secret=shared_secret)
+    packet = pg.gen_packet(args.command_type, args.nargs, args.args)
     print(hexdump_str(packet))

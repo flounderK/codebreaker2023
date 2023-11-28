@@ -1,3 +1,7 @@
+
+# start with 'gdb-multiarch -x gdbinit_agent' on docker container
+# and `./gdbserver-aarch64 :1234 /agent/agent /agent/config` on the qemu guest
+# pipe packets in from the docker container with 'cat packet_2.bin | nc -u 10.101.255.254 9000'
 unset env LINES
 unset env COLUMNS
 set height 0
@@ -50,6 +54,21 @@ cont
 end
 
 
+set $MAIN_WORKSTRUCT = 0
+set $BP_cmd_thread = $BINBASE + 0x00401220
+b *$BP_cmd_thread
+set $BP_cmd_thread_bpnum = $bpnum
+commands
+silent
+printf "cmd_thread %p, main workstruct %p\n", $x0, *(void**)($x0+8)
+set $MAIN_WORKSTRUCT = *(void**)($x0+8)
+hexdumpbuf $MAIN_WORKSTRUCT 0x200
+printf "cmd struct\n"
+hexdumpbuf $x0 0x200
+cont
+end
+
+
 set $BP_sha256_ctx_init = $BINBASE + 0x0040b790
 b *$BP_sha256_ctx_init
 set $BP_sha256_ctx_init_bpnum = $bpnum
@@ -85,7 +104,6 @@ end
 
 set $ECC_OUTBUF = 0
 
-# set $BP_ecc_decrypt = $BINBASE + 0x0040b8b4
 set $BP_ecc_decrypt = $BINBASE + 0x00409324
 b *$BP_ecc_decrypt
 set $BP_ecc_decrypt_bpnum = $bpnum
@@ -94,6 +112,7 @@ silent
 printf "ecc_decrypt\n"
 printf "x0=%p, x1=%p, x2=%p\n", $x0, $x1, $x2
 set $ECC_OUTBUF = $x2
+hexdumpbuf $MAIN_WORKSTRUCT 0x200
 cont
 end
 
@@ -106,10 +125,10 @@ printf "ecc_decrypt_ret\n"
 # inject the public-key X coordinate into the buffer holding the shared-secret
 printf "injecting shared secret\n"
 py shared_secret_addr = int(gdb.parse_and_eval("$ECC_OUTBUF").format_string())
-# py write_bytes = bytes.fromhex("894d 6341 662a 70e3 d4f8 467c 9b25 7bbc0ff2 f558 a241 6335 c7d4 8845 532c 8ca6")
-py f = open("ecc_p256_public.bin", "rb")
-py write_bytes = f.read()[:32]
-py f.close()
+py write_bytes = bytes.fromhex("894d 6341 662a 70e3 d4f8 467c 9b25 7bbc0ff2 f558 a241 6335 c7d4 8845 532c 8ca6")
+# py f = open("ecc_p256_public.bin", "rb")
+# py write_bytes = f.read()[:32]
+# py f.close()
 py inf = gdb.selected_inferior()
 py inf.write_memory(shared_secret_addr, write_bytes, len(write_bytes))
 cont
@@ -406,7 +425,7 @@ set $BP_command_set_unlink_agent_response_bpnum = $bpnum
 commands
 silent
 printf "command_set_unlink_agent_response \n"
-cont
+# cont
 end
 
 set $BP_past_command_type_bounds_check = $BINBASE + 0x004011e8
@@ -436,6 +455,7 @@ silent
 printf "after_strtol %p\n", $x0
 cont
 end
+
 
 
 target remote 10.101.255.254:1234

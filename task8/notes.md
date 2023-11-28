@@ -493,7 +493,7 @@ revisiting commands
 # gathering info on the provided packets
 Though I don't have the private or public keys, the way that the AES key is generated is insufficient, as the same key and same IV are generated for each packet (at least for packets going to the same device), so xoring a given encrypted data section with the plaintext that was encrypted for the packet will yield the same encrypted block for each packet. This means that the AES key isn't actually needed to decrypt the packets, the plaintext for one packet just needs to be known to generate the key for each block.
 
-```
+```python
 p2_cmd_chunk = bytes.fromhex('75d6 5acd cf89 ca68 a28e 4431 4b22 9ed0')
 p3_cmd_chunk = bytes.fromhex('73d6 5acd cf89 ca68 a28e 4431 4b22 9ed0')
 
@@ -616,7 +616,7 @@ While reversing for task 8, I noticed that ghidra just won't display one of the 
 ```
 
 Contents of the command handler that didn't show up
-```
+```c
 bool command_set_unlink_agent_response_00400d20(main_workstruct *param_1,int nargs)
 
 {
@@ -629,7 +629,7 @@ bool command_set_unlink_agent_response_00400d20(main_workstruct *param_1,int nar
 ```
 
 Then back in `main`:
-```
+```c
     *cmd_thread finishes up*
     ...
 
@@ -664,4 +664,50 @@ Number of Arguments (0)
 00000050: 0000 0000 0000 0000 0000 0000 0000 0000  ................
 00000060: 0000 0000 0000 0000 0000 0000 0000 0000  ................
 00000070: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+```
+
+After trying to reach this command for a while it appears that ghidra actually just optimized the unreachable case in the switch statement
+out.
+
+So I turned to undefined behavior...
+
+Something I noticed while working on task 8 early on was that an hmac key greater than 0x40 bytes will cause a thread to exit early. After looking a little bit more at the main struct that was used everywhere I realized that the hmac buffer in the struct `[1]` is right before the two ints that actually determine whether the the `agent_restart` file is `unlink`ed are actually right past it.
+
+
+```c
+struct main_workstruct {
+    char balloon_id0_0x0[4];
+    undefined field1_0x4;
+    undefined field2_0x5;
+    undefined field3_0x6;
+    undefined field4_0x7;
+    char * * executed_binary_path; /* Created by retype action */
+    char * * some_path_0x10; /* Created by retype action */
+    struct maybe_linked_list * maybe_linked_list;
+    undefined * * pthread_mutex_0x20;
+    int * ssh_priv_key_0x28;
+    undefined * hmac_key_file_0x30;
+    undefined8 collector_0x38;
+    undefined8 collector_0x40;
+    undefined8 collector_0x48;
+    char hmac_key_file_outbuf_0x50[64]; /* Created by retype action */ // [1]
+    int is_waiting_for_other_threads_0x90;
+    int do_agent_restart_unlink_on_return_to_main_0x94;
+    undefined4 collect_enabled_0x98; /* Created by retype action */
+    undefined field18_0x9c;
+    undefined field19_0x9d;
+    undefined field20_0x9e;
+    undefined field21_0x9f;
+    pointer navigate_ipc_0xa0;
+};
+
+struct maybe_linked_list {
+    struct allocd_var_struct * field0_0x0;
+    struct allocd_var_struct * field1_0x8;
+};
+
+struct allocd_var_struct {
+    void * field0_0x0;
+    void * field1_0x8;
+};
 ```

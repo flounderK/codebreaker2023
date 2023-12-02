@@ -60,7 +60,7 @@ Alternative Function Assignments Table:
 |GPIO20|Low|PCM_DIN|SD12|\<reserved\>|SPI1_MOSI|GPCLK0|
 |GPIO21|Low|PCM_DOUT|SD13|\<reserved\>|SPI1_SCLK|GPCLK1|
 |GPIO32|Low|GPCLK0|SA1|\<reserved\>|TXD0||TXD1|
-|GPIO33|Low|\<reserved\>|SA0|\<reserved\>RXD0||RXD1|
+|GPIO33|Low|\<reserved\>|SA0|\<reserved\>|RXD0||RXD1|
 |GPIO40|Low|PWM0|SD4||\<reserved\>|SPI2_MISO|TXD1|
 |GPIO41|Low|PWM1|SD5|\<reserved\>|\<reserved\>|SPI2_MOSI|RXD1|
 

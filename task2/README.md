@@ -51,18 +51,18 @@ Alternative Function Assignments Table:
 
 |GPIO # |Pull|ALT0|ALT1|ALT2|ALT3| ALT4| ALT5|
 |-------|----|----|----|----|----|-----|-----|
-|GPIO14|Low|TXD0|SD6|<reserved>|||TXD1|
-|GPIO15|Low|RXD0|SD7|<reserved>|||RXD1|
-|GPIO16|Low|<reserved>|SD8|<reserved>|CTS0SPI1_CE2_N|CTS1|
-|GPIO17|Low|<reserved>|SD9|<reserved>|RTS0SPI1_CE1_N|RTS1|
-|GPIO18|Low|PCM_CLK|SD10|<reserved>|PWM0|
-|GPIO19|Low|PCM_FS|SD11|<reserved>|SPI1_MISO|PWM1|
-|GPIO20|Low|PCM_DIN|SD12|<reserved>|SPI1_MOSI|GPCLK0|
-|GPIO21|Low|PCM_DOUT|SD13|<reserved>|SPI1_SCLK|GPCLK1|
-|GPIO32|Low|GPCLK0|SA1|<reserved>|TXD0||TXD1|
-|GPIO33|Low|<reserved>|SA0|<reserved>RXD0||RXD1|
-|GPIO40|Low|PWM0|SD4||<reserved>|SPI2_MISO|TXD1|
-|GPIO41|Low|PWM1|SD5|<reserved>|<reserved>|SPI2_MOSI|RXD1|
+|GPIO14|Low|TXD0|SD6|\<reserved\>|||TXD1|
+|GPIO15|Low|RXD0|SD7|\<reserved\>|||RXD1|
+|GPIO16|Low|\<reserved\>|SD8|\<reserved\>|CTS0SPI1_CE2_N|CTS1|
+|GPIO17|Low|\<reserved\>|SD9|\<reserved\>|RTS0SPI1_CE1_N|RTS1|
+|GPIO18|Low|PCM_CLK|SD10|\<reserved\>|PWM0|
+|GPIO19|Low|PCM_FS|SD11|\<reserved\>|SPI1_MISO|PWM1|
+|GPIO20|Low|PCM_DIN|SD12|\<reserved\>|SPI1_MOSI|GPCLK0|
+|GPIO21|Low|PCM_DOUT|SD13|\<reserved\>|SPI1_SCLK|GPCLK1|
+|GPIO32|Low|GPCLK0|SA1|\<reserved\>|TXD0||TXD1|
+|GPIO33|Low|\<reserved\>|SA0|\<reserved\>RXD0||RXD1|
+|GPIO40|Low|PWM0|SD4||\<reserved\>|SPI2_MISO|TXD1|
+|GPIO41|Low|PWM1|SD5|\<reserved\>|\<reserved\>|SPI2_MOSI|RXD1|
 
 
 Based on this table, I was able to narrow down my options for the GPIO questions. In `ALT5` mode, 14, 32, and 40 are UART `TXD1`, 15, 33, and 41 are UART `RXD1`. The pairs of options for TX and RX are (14 & 15) (32 & 33) (40 & 41).

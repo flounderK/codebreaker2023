@@ -4,15 +4,6 @@ import sqlite3
 import json
 import datetime
 
-with open("USCG.log", "r") as f:
-    log_data = json.load(f)
-
-log_timestamp = datetime.datetime.strptime(log_data['timestamp'],
-                                           "%m/%d/%Y, %H:%M:%S")
-coords = log_data['coordinates'][0]
-log_longitude = float(coords['longitude'])
-log_latitude = float(coords['latitude'])
-
 
 def group_by_increment(iterable, group_incr, field_access=None):
     """
@@ -36,6 +27,15 @@ def group_by_increment(iterable, group_incr, field_access=None):
     return grouped
 
 
+with open("USCG.log", "r") as f:
+    log_data = json.load(f)
+
+log_timestamp = datetime.datetime.strptime(log_data['timestamp'],
+                                           "%m/%d/%Y, %H:%M:%S")
+coords = log_data['coordinates'][0]
+log_longitude = float(coords['longitude'])
+log_latitude = float(coords['latitude'])
+
 cursor = sqlite3.connect("database.db")
 
 keys = [
@@ -52,7 +52,6 @@ keys = [
     "id",
     "event_name",
 ]
-
 
 query = """SELECT
         a.transcript,
@@ -74,9 +73,11 @@ WHERE
     e.audio_object_id = a.id;"""
 
 c = cursor.execute(query)
-
 result = c.fetchall()
-# dict_records = [dict(zip(keys, i)) for i in result]
+c.close()
+
+# change the format of the data from tuple to dict
+# and fix up the types of all of the records
 dict_records = []
 for i in result:
     rec = dict(zip(keys, i))
@@ -85,9 +86,7 @@ for i in result:
                                                  "%m/%d/%Y %H:%M:%S")
     rec['longitude_f'] = float(rec['longitude'])
     rec['latitude_f'] = float(rec['latitude'])
-    # rec['elevation_i'] = int(rec['elevation'])
     dict_records.append(rec)
-
 
 # time boundary set by prompt
 TIME_BOUNDS_SEC = 60*10
@@ -111,7 +110,8 @@ for rec_group in grouped_by_time:
     if found_rec_group:
         break
 
-# now all records in found_rec_group meet the time criteria
+# now all records in found_rec_group meet the time criteria of being within
+# 10 minutes
 
 
 DIST_BOUNDS = 1/100

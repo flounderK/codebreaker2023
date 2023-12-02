@@ -1,9 +1,28 @@
 
-# Qemu command
+# Task 4 - Emulate the Firmware - (Dynamic Reverse Engineering, Cryptography)Points: 500
+
+```
+We were able to extract the device firmware, however there isn't much visible on it. All the important software might be protected by another method.
+
+There is another disk on a USB device with an interesting file that looks to be an encrypted filesystem. Can you figure out how the system decrypts and mounts it? Recover the password used to decrypt it. You can emulate the device using the QEMU docker container from task 3.
+
+
+Downloads:
+
+main SD card image (sd.img.bz2)
+USB drive image (usb.img.bz2)
+Linux kernel (kernel8.img.bz2)
+Device tree blob file for emulation (bcm2710-rpi-3-b-plus.dtb.bz2)
+
+
+Enter the password used to decrypt the filesystem.
+```
+
+# Qemu Detour
+## Qemu command
 qemu-system-aarch64  -cpu cortex-a53 -machine virt -kernel kernel8.img -dtb bcm2710-rpi-3-b-plus.dtb.mod -s -S -serial stdio -device sdhci-pci -device sd-card,drive=sdcarddrive -drive id=sdcarddrive,if=none,format=raw,file=sd.img -device usb-ehci,id=ehci -device usb-storage,bus=ehci.0,drive=usbdrive -drive id=usbdrive,if=none,format=raw,file=usb.img
 
 
-#
 worked once and showed hdmi output, but hasn't since
 ```
 qemu-system-aarch64 -cpu cortex-a53 -smp 4 -machine raspi3ap -kernel kernel8.img -dtb bcm2710-rpi-3-b-plus.dtb -sd sd.img -usb -device usb-storage,drive=myusbdrive -drive id=myusbdrive,if=none,file=usb.img
@@ -72,7 +91,7 @@ total 0
 
 
 Looks like decryption is only a matter of getting the value of `$DATA`:
-```
+```bash
 ╰─# cat mnt/mount_part
 #!/bin/sh
 
@@ -95,7 +114,7 @@ mkdir -p $ENC_MOUNT
 mount /dev/mapper/part $ENC_MOUNT
 ```
 
-And `hostname` is already present, meaning that there are only 3 bytes of the key that aren't known.
+`${ID:0:3}` gets bytes 0-3 of the string in `$ID`, and `hostname` is already present, meaning that there are only 3 bytes of the key that aren't known.
 ```
 ╰─# cat mnt/hostname
 gabbypray
@@ -103,21 +122,20 @@ gabbypray
 
 Unfortunately `id.txt` wasn't present anywhere, but 3 bytes is easy enough to brute force.
 
-At first I just tried to write a python script to brute force
-
+At first I just tried to write a python script to brute force the password by running the command  `echo -n $DATA | openssl sha1 | awk '{print $NF}' | cryptsetup open $ENC_PARTITION part` and changing the value of `$DATA` every time, but it turns out that running a few bash command on a single thread is really slow.
 
 here is roughly the command I needed to run to brute force it:
 ```
 bruteforce-luks -f only_hashes -t 6 -v 30 part.enc -w bruteforce_state
 ```
 
-But at my best estimate that would take... (at 0.6 passwords per second)
+But at my best estimate at 0.6 passwords per second that would take...
 ```
 In [4]: ((int(238329.0 / 0.6) / 60) / 60 ) / 24
 Out[4]: 4.597395833333334
 ```
 Around `4.6` days in which I wouldn't be able to use my laptop at all.
-Instead, I opted to use a cloud compute provider and just rent
+Instead, I opted to use a cloud compute provider and just rent a few virtual machines.
 
 ```
 # generate a list of unique hashes to use as passwords
@@ -129,7 +147,7 @@ cat unique_hashes| cut -d ' ' -f3 > only_hashes
 ╰─$ wc only_hashes
  238329  238328 9771449 only_hashes
 
-
+# split up the text into a few different files
 split --lines=$(python3 -c 'print(int(int(238329 + 8 - 1) / 8))') only_hashes
 
 # then start up 8 different brute forcers to make things go quicker

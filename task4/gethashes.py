@@ -42,3 +42,15 @@ with open("hashes", "wb") as f:
             f.write(key.encode() + b' ' + stdout + b'\n')
             continue
 
+"""
+# In retrospect, the following loop would have generated these hases in
+# around a second...
+hashes_with_passwords = []
+hostname = b'gabbypray'
+for comb in itertools.product(alph, repeat=3):
+    id_first_3 = ''.join(comb).encode()
+    password = hostname + id_first_3
+    hashstr = hashlib.sha1(password).hexdigest()
+    hashes_with_passwords.append("%s %s" % (hashstr, str(password)))
+
+"""

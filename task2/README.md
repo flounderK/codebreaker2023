@@ -27,9 +27,9 @@ Provide the correct physical pin number for a UART receive function:
 
 For this task I pretty much just looked at the cpu picture and found `BCM2837-Broadcom.pdf` online.
 
-[cpu.jpg](cpu.jpg)
+![cpu.jpg](cpu.jpg)
 
-[pinout.svg](pinout.svg)
+![pinout.svg](pinout.svg)
 
 Based on the picture, the cpu was a `BCM2837` arm system-on-chip.
 Based on the `boot_prompt.log` file, the system is in `ALT5` function mode.

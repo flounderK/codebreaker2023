@@ -121,6 +121,7 @@ for rec in dict_records:
     long_diff = abs(rec['longitude_f'] - log_longitude)
     lat_diff = abs(rec['latitude_f'] - log_latitude)
     if long_diff <= DIST_BOUNDS and lat_diff <= DIST_BOUNDS:
+        print("id %d" % rec['id'])
         print("long diff %s" % str(long_diff))
         print("lat diff %s" % str(lat_diff))
         print("")

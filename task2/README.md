@@ -53,8 +53,8 @@ Alternative Function Assignments Table:
 |-------|----|----|----|----|----|-----|-----|
 |GPIO14|Low|TXD0|SD6|\<reserved\>|||TXD1|
 |GPIO15|Low|RXD0|SD7|\<reserved\>|||RXD1|
-|GPIO16|Low|\<reserved\>|SD8|\<reserved\>|CTS0SPI1_CE2_N|CTS1|
-|GPIO17|Low|\<reserved\>|SD9|\<reserved\>|RTS0SPI1_CE1_N|RTS1|
+|GPIO16|Low|\<reserved\>|SD8|\<reserved\>|CTS0|SPI1_CE2_N|CTS1|
+|GPIO17|Low|\<reserved\>|SD9|\<reserved\>|RTS0|SPI1_CE1_N|RTS1|
 |GPIO18|Low|PCM_CLK|SD10|\<reserved\>|PWM0|
 |GPIO19|Low|PCM_FS|SD11|\<reserved\>|SPI1_MISO|PWM1|
 |GPIO20|Low|PCM_DIN|SD12|\<reserved\>|SPI1_MOSI|GPCLK0|

@@ -197,8 +197,9 @@ mnt/lost+found:
 total 0
 ```
 
-Then to close:
+Then to unmount and close:
 ```
+umount mnt
 cryptsetup close part
 ```
 

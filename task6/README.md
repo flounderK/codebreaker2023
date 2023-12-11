@@ -17,9 +17,11 @@ Enter the IP address (don't guess)
 ```
 
 
-## Connection Command
+## Connection Commands
 ```
 ssh -vvvv -o "IdentitiesOnly=yes" -i ~/.ssh/jumpbox.key -L 27017:100.107.142.158:27017  user@external-support.bluehorizonmobile.com
+
+mongosh 'mongodb://maintenance:e34adee367a46a@localhost:27017/?authSource=snapshot-f2852ce48e77'
 ```
 
 ## Solution

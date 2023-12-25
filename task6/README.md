@@ -1,4 +1,4 @@
-# Task 6 - Follow the Data Part 2 - (Forensics, Databases, Exploitation)Points: 800
+# Task 6 - Follow the Data Part 2 - (Forensics, Databases, Exploitation)
 ```
 While you were working, we found the small U.S. cellular provider which issued the SIM card recovered from the device: Blue Horizon Mobile.
 

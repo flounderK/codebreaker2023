@@ -1,4 +1,4 @@
-# Task 7 - There is Another - (Reverse Engineering, Exploitation)Points: 1200
+# Task 7 - There is Another - (Reverse Engineering, Exploitation)
 ```
 Intelligence sources indicate with high probably there is a second device somewhere. We don't know where it is physically, but maybe you can find it's IP address somehow. We expect it is one of the up to 2^20 devices connected to the Blue Horizon Mobile network. Blue Horizon Mobile has explained that their internal network is segmented so all user devices are in the 100.64.0.0/12 IP range.
 

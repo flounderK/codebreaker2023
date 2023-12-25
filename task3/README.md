@@ -1,5 +1,5 @@
 
-# Task 3 - Analyze the Firmware - (Emulation)Points: 200
+# Task 3 - Analyze the Firmware - (Emulation)
 
 ```
 Leveraging that datasheet enabled you to provide the correct pins and values to properly communicate with the device over UART. Because of this we were able to communicate with the device console and initiate a filesystem dump.

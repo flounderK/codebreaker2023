@@ -1,5 +1,5 @@
 
-# Task 4 - Emulate the Firmware - (Dynamic Reverse Engineering, Cryptography)Points: 500
+# Task 4 - Emulate the Firmware - (Dynamic Reverse Engineering, Cryptography)
 
 ```
 We were able to extract the device firmware, however there isn't much visible on it. All the important software might be protected by another method.

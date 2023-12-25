@@ -63,6 +63,7 @@ all user device ips are in the 100.64.0.0/12 range, meaning the second octet has
 Got confirmation from mike that I am allowed to portscan
 
 # Network Diagram
+A good portion of this task was just attempting to map out roughly what the network looked like. This is the final Diagram that I ended up with, including some information from task 8 and task 9. Note that in this diagram the blue connctions are essentially just me re-creating the connections to the C2 infrastructure that would normally be created by the device.
 ![Network Diagram](../resources/Codebreaker23-Network-Diagram-With-Sections.drawio.png "Network Diagram")
 
 

@@ -62,6 +62,9 @@ all user device ips are in the 100.64.0.0/12 range, meaning the second octet has
 # portscanning
 Got confirmation from mike that I am allowed to portscan
 
+# Network Diagram
+![Network Diagram](../resources/Codebreaker23-Network-Diagram-With-Sections.drawio.png "Network Diagram")
+
 
 # Solution
 

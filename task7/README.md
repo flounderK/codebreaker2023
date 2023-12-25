@@ -13,6 +13,7 @@ Enter device IP addresses, one per line (don't guess)
 ```
 
 # Tooling for the VM
+Everything in the device firmware is statically linked and `libc` and `ld.so` don't exist on the device, so getting tooling onto the device was a bit of a pain, but also incredibly useful.
 
 ## Strace
 ### Building for aarch64
@@ -20,7 +21,7 @@ It turns out that cross compiling strace for aarch64 isn't difficult, but the `s
 
 
 Install some deps
-```
+```bash
 sudo apt install gcc-aarch64-linux-gnu
 sudo apt install crossbuild-essential-arm64
 sudo apt install crossbuild-essential-armel
@@ -30,7 +31,7 @@ sudo apt install gcc-arm-linux-gnueabi gcc-arm-none-eabi
 sudo apt install vsftpd
 ```
 
-```
+```bash
 git clone git@github.com:strace/strace.git
 cd strace
 ./bootstrap
@@ -44,30 +45,73 @@ gzip strace.tar
 sudo cp strace.tar.gz ~
 ```
 
-### getting strace onto the target system
+## gdbserver
+If you aren't familliar with `gdbserver`, it is an extremely useful tool for debugging. It lets you debug processes on a remote device and allows you to connect over the network to that device with `gdb` or `gdb-multiarch`. Very convenient if you are creating a `gdbinit` or can't get normal `gdb` to work for the device you are trying to debug things on (like if the device only has statically compiled binaries on it or you want access to `gdb`'s `python` api on a system that you are having trouble building python on).
+
+### Building gdbserver
+`gdb` has a few dependencies that I wasn't aware of before, so here are all of the commands that I used to clone and build all of the code I needed to get a statically linked copy of `gdbserver`. Please note that the build process fails sometime after `gdbserver` completes building.
+```bash
+# clone and build static libraries for gmp
+
+hg clone https://gmplib.org/repo/gmp
+cd gmp
+./.bootstrap
+
+mkdir build
+cd build
+ARCH='aarch64' CC='aarch64-linux-gnu-gcc' LD='aarch64-linux-gnu-ld' CXX='aarch64-linux-gnu-g++' LDFLAGS='-static' ../configure --host=aarch64-gnu-linux
+make
+
+cd ../..
+
+# clone and build static libraries for mpfr
+git clone https://gitlab.inria.fr/mpfr/mpfr.git
+cd mpfr
+./autogen.sh
+mkdir build
+cd  build
+ARCH='aarch64' CC='aarch64-linux-gnu-gcc' LD='aarch64-linux-gnu-ld' CXX='aarch64-linux-gnu-g++' LDFLAGS='-static' ../configure --host=aarch64-gnu-linux  --with-gmp-build="$HOME/cloned/gmp/build"
+make
+
+cd ../..
+
+
+# clone and build static gdbserver using gmp and mpfr
+git clone https://sourceware.org/git/binutils-gdb.git
+cd binutils-gdb
+mkdir build
+cd build
+ARCH='aarch64' CC='aarch64-linux-gnu-gcc' LD='aarch64-linux-gnu-ld' CXX='aarch64-linux-gnu-g++' AR='aarch64-linux-gnu-ar' LDFLAGS='-static' ../configure --host=aarch64-gnu-linux --target=aarch64-gnu-linux --with-gmp-lib="$HOME/cloned/gmp/build/.libs/" --with-gmp-include="$HOME/cloned/gmp/build/" --with-mpfr-lib="$HOME/cloned/mpfr/build/src/.libs" --with-mpfr-include="$HOME/cloned/mpfr/src"
+make
 ```
-ftpget -u clif -p '<redacted>' 192.168.86.23 strace.tar.gz
+
+### getting strace onto the target system
+I just hosted an `ftp` server on my laptop and ran this command on the vm:
+```bash
+ftpget -u clif -p '<redacted>' 192.168.1.23 strace.tar.gz
 ```
 
 # connect to the new server
 ip address answer from the previous problem: 100.90.12.106
 
-```
+```bash
 ssh -o "IdentitiesOnly=yes" -i ~/.ssh/jumpbox.key -L 27017:100.90.12.106:27017 user@external-support.bluehorizonmobile.com
 ```
 
 all user device ips are in the 100.64.0.0/12 range, meaning the second octet has to be between 64 and 79 for the ip to be a user device
 
+# Solution
 
-# portscanning
-Got confirmation from mike that I am allowed to portscan
+## Enumeration and identification of communication channels
+Using the ip address answer from the previous problem (100.90.12.106),
 
-# Network Diagram
+
+### Port Scanning
+I initially started trying to portscan
+
+### Network Diagram
 A good portion of this task was just attempting to map out roughly what the network looked like. This is the final Diagram that I ended up with, including some information from task 8 and task 9. Note that in this diagram the blue connctions are essentially just me re-creating the connections to the C2 infrastructure that would normally be created by the device.
 ![Network Diagram](../resources/Codebreaker23-Network-Diagram-With-Sections.drawio.png "Network Diagram")
-
-
-# Solution
 
 
 SSH is being used to wrap an http server

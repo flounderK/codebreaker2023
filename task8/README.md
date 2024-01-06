@@ -14,9 +14,89 @@ Packet capture (capture.pcap)
 Enter the HMAC key string used to authenticate the given packet.
 ```
 
-Provided with a single UDP packet.
+I was provided with a single UDP packet in a pcap file.
 
-Data from the UDP packet:
+![../resources/wireshark_single_packet.png](../resources/wireshark_single_packet.png)
+
+The packet is a UDP packet destined for port `9000` using an unrecognized protocol.
+
+
+## Raw data from the UDP packet:
+```
+00000000: 6b17 d1f2 e12c 4247 f8bc e6e5 63a4 40f2  k....,BG....c.@.
+00000010: 7703 7d81 2deb 33a0 f4a1 3945 d898 c296  w.}.-.3...9E....
+00000020: 4fe3 42e2 fe1a 7f9b 8ee7 eb4a 7c0f 9e16  O.B........J|...
+00000030: 2bce 3357 6b31 5ece cbb6 4068 37bf 51f5  +.3Wk1^...@h7.Q.
+00000040: 9aaa 943b 66fa ed7e af57 c1cf 35e3 c88f  ...;f..~.W..5...
+00000050: e7ef 2080 0985 0798 ae0c a530 502c f43f  .. ........0P,.?
+00000060: ba46 1296 20f9 1e37 42af e650 cee2 7b8d  .F.. ..7B..P..{.
+00000070: 9e81 804f 081e 254d 686e 9577 72d2 3e23  ...O..%Mhn.wr.>#
+00000080: 6cb1 00e3 f74e 6cf5 76f0 5d4d 4a58 3e50  l....Nl.v.]MJX>P
+00000090: ef6e 8b00 c450 5e93 baaf 92d2 1a00 9b6d  .n...P^........m
+000000a0: 711f 70a3 bfb6 18fe 71bc 1729 e04b 318d  q.p.....q..).K1.
+000000b0: f7f2 1875 e437 eebe 5b58 5643 88bf 444d  ...u.7..[XVC..DM
+000000c0: 2769 3f48 fba7 8e3a 2866 d902 4c83 1203  'i?H...:(f..L...
+000000d0: a59c f8b5 db71 7f03 881c 9ea2 22bc e178  .....q......"..x
+000000e0: fa5c f9ca 0bbc 1b2a 0caf 67ea ac95 38be  .\.....*..g...8.
+000000f0: b233 9658 f86f 6504 a0a5 cd3c 672d 2398  .3.X.oe....<g-#.
+00000100: f16f 6e7d f867 51e1 c008 d792 c068 9dae  .on}.gQ......h..
+00000110: 7db1 cc16 9179 1a4a a471 c1b6 288a ef09  }....y.J.q..(...
+```
+
+## Identifying the structure of the packet.
+A decent amount of of reverse engineering of `agent` went into determining the structure of the packet.
+```bash
+╰─$ binwalk agent
+
+DECIMAL       HEXADECIMAL     DESCRIPTION
+--------------------------------------------------------------------------------
+0             0x0             ELF, 64-bit LSB executable, version 1 (SYSV)
+61221         0xEF25          Certificate in DER format (x509 v3), header length: 4, sequence length: 6689
+658416        0xA0BF0         AES S-Box                              <--------------
+658744        0xA0D38         SHA256 hash constants, little endian   <-------------
+659512        0xA1038         Unix path: /usr/share/locale
+684840        0xA7328         Unix path: /usr/share/zoneinfo
+691528        0xA8D48         Unix path: /var/run/nscd/socket
+693968        0xA96D0         Unix path: /usr/lib/aarch64-linux-gnu/
+694048        0xA9720         ELF, 64-bit LSB core file no machine, (SYSV)
+699968        0xAAE40         Unix path: /usr/lib/locale
+701824        0xAB580         Unix path: /usr/lib/locale/locale-archive
+```
+
+`binwalk` helped me to identify that `agent` contains constants for both `AES` and `SHA256`, so I looked at where those were used to confirm that the locations where those constants were used in `agent` was associated with the code in `cmd_thread`.
+
+![../resources/ghidra_cmd_thread_main_flow.png](../resources/ghidra_cmd_thread_main_flow.png)
+
+A quick look at the locations of those constants confirmed that they were used in the function that I assumed was meant for message authentication and decryption, which I named `do_message_authentication_and_decryption`.
+
+## Reviewing the problem statement to create a roadmap for the task
+The problem statement for this task was "Can you decrypt the packet and recover the secret HMAC key the software uses to verify the contents?". As a reminder, the firmware image had a few files that were missing, empty, or filled with junk data: `ecc_p256_private.bin`, `hmac_key`.
+
+In general I am not really much of a cryptography person. I know the basics, but not much about the actual implementations or specifics of any algorithms. What I do know is that `AES` is generally understood to be a mathematically sound algorithm that is resistant to brute force attacks like the one I utilized in task 4. This indicated to me that to decrypt something encrypted with `AES` without knowing the encryption key likely means finding some sort of flaw in the implementation of the algorithm or in how the algorithm is used in the context of an application or binary.
+
+To help narrow down where to look in `agent` for that kind of flaw, I decided to prioritize determining if the implementations of `AES` and `SHA256` were from a common open-source library; If the implementations were open-source, it would make more sense to me to focus on how the algorithms were used rather than the specifics of what was done in the implementations.
+
+
+### Subtasks for this task
+- Identify the structure of the packet
+- Identify all of the algorithms utilized for cryptography, hashing, and authentication in `agent` used for handling incoming command packets
+- Identify which, if any, of the cryptography algorithm implementations in `agent` are open-source
+- Uncover and document the stages and different forms of the "life" of the packet from when it is received all the way to where the commands encrypted in the packet are executed
+
+
+
+## Breakdown of data from the UDP packet:
+this is roughly what I ended up with:
+```c
+// size 0x60
+struct CommandHeader {
+    byte ecc_encrypted_seed[0x40];
+    byte hmac[0x20];
+    byte payload[0];
+}
+
+```
+
 ```
 NIST-P256 Elliptic Curve Cryptography data:
     - 0x40 (64) bytes
@@ -52,7 +132,7 @@ AES Encrypted buffer
 ```
 
 
-ecc_p256_public.bin
+`ecc_p256_public.bin`
 ```
 00000000: 894d 6341 662a 70e3 d4f8 467c 9b25 7bbc  .McAf*p...F|.%{.
 00000010: 0ff2 f558 a241 6335 c7d4 8845 532c 8ca6  ...X.Ac5...ES,..

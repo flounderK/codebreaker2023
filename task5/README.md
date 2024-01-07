@@ -193,9 +193,64 @@ diagclient:    ELF 64-bit LSB executable, ARM aarch64, version 1 (SYSV), statica
 dropper:       ELF 64-bit LSB executable, ARM aarch64, version 1 (SYSV), statically linked, Go BuildID=G1BmcQs3eKWjgqPFtG1u/vjym0bDIzbpAmG4ECqx2/UCIHtpwbefFngLclS-n9/ZJyKNowL1B6arnAtldx0, with debug_info, not stripped
 ```
 
-No imports from `agent`, libc looks like it is compiled in
+No imports from `agent`, libc looks like it is linked in statically.
 
 # Reversing agent
+For any binary that I am reverse engineering, I find the most useful functions to identify are:
+- the `entrypoint`
+- logging/debug functions
+- functions that interact with the system (syscalls) if they are present
+- constructors/destructors if they exist
+
+## entrypoint
+Ghidra automatically found the enrypoint, so I just started working from there.
+
+![Unsymbolized entry](../resources/ghidra_agent_unsymbolized_entry.png)
+
+The entrypoint looked a lot like a typical binary linked against libc
+![](../resources/ghidra_typical_libc_bin_entry.png)
+
+So I made the assumption that `LAB_00400bf4` was actually `main`.
+
+## logging functions
+
+At least some of the logging functions were immediately apparent just looking at `main`, and with no string obfuscation too.
+
+![](../resources/ghidra_agent_unsymbolized_main.png)
+
+## syscalls
+Because `agent` was statically linked, I had to go and find syscalls rather than getting them for free from symbols. So I looked up the syscall calling convention on `aarch64` and found [this stackoverflow question](https://stackoverflow.com/questions/45742869/linux-syscall-conventions-for-armv8).
+
+![](../resources/aarch64_syscall_stackoverflow.png)
+
+So I went and got the bytes for the `svc #0` instruction mentioned in the response.
+
+![](../resources/ipython_aarch64_svc.png)
+
+Then I used ghidra's `Instruction Pattern Search` functionality to search for the bytes:
+
+![](../resources/ghidra_search_for_instruction_pattern.png)
+
+![](../resources/ghidra_instruction_pattern_search_hover_enter_bytes_manually.png)
+
+![](../resources/ghidra_instruction_pattern_search_entered_bytes.png)
+
+Which returned quite a few results:
+
+![](../resources/ghidra_instruction_pattern_search_svc_results.png)
+
+At that point I decided to just start off with the most common syscalls like `read`, `write`, `socket` etc. so I adjusted my search a little bit to show which syscall number was associated with each match.
+
+![](../resources/ghidra_masked_instruction_search.png)
+
+![](../resources/ghidra_masked_search_results.png)
+
+Then I just picked out the syscall numbers that I cared about from [The chromium docs syscall table](https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md#arm64-64_bit) and manually changed those function names.
+
+
+
+## everything else
+I would like to say that I used a clever trick or feature of ghidra like Function ID databases to help with reverse engineering `agent`, but I didn't really have a ton of luck with them, and the few functions that I was able
 
 
 # Reversing dropper

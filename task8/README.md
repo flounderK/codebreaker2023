@@ -72,7 +72,7 @@ A quick look at the locations of those constants confirmed that they were used i
 ## Reviewing the problem statement to create a roadmap for the task
 The problem statement for this task was "Can you decrypt the packet and recover the secret HMAC key the software uses to verify the contents?". As a reminder, the firmware image had a few files that were missing, empty, or filled with junk data: `ecc_p256_private.bin`, `hmac_key`.
 
-In general I am not really much of a cryptography person. I know the basics, but not much about the actual implementations or specifics of any algorithms. What I do know is that `AES` is generally understood to be a mathematically sound algorithm that is resistant to brute force attacks like the one I utilized in task 4. This indicated to me that to decrypt something encrypted with `AES` without knowing the encryption key likely means finding some sort of flaw in the implementation of the algorithm or in how the algorithm is used in the context of an application or binary.
+In general I don't know very much about cryptography. I know the basics, but not much about the actual implementations or specifics of any algorithms. What I do know is that `AES` is generally understood to be a mathematically sound algorithm that is resistant to brute force attacks like the one I utilized in task 4. This indicated to me that to decrypt something encrypted with `AES` without knowing the encryption key likely means finding some sort of flaw in the implementation of the algorithm or in how the algorithm is used in the context of an application or binary.
 
 To help narrow down where to look in `agent` for that kind of flaw, I decided to prioritize determining if the implementations of `AES` and `SHA256` were from a common open-source library; If the implementations were open-source, it would make more sense to me to focus on how the algorithms were used rather than the specifics of what was done in the implementations.
 
@@ -86,7 +86,6 @@ To help narrow down where to look in `agent` for that kind of flaw, I decided to
 
 
 ## Breakdown of data from the UDP packet:
-this is roughly what I ended up with:
 ```c
 // size 0x60
 struct CommandHeader {

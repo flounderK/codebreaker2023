@@ -103,11 +103,13 @@ all user device ips are in the 100.64.0.0/12 range, meaning the second octet has
 # Solution
 
 ## Enumeration and identification of communication channels
-Using the ip address answer from the previous problem (100.90.12.106),
-
 
 ### Port Scanning
-I initially started trying to portscan
+I initially started trying to portscan the ip address answer from the previous problem (100.90.12.106) with [this script](scanallports.sh). While technically the script works, it was extremely slow and it never actually finished scanning. I was however able to find the openssh server on port 22 with the script.
+
+This somewhat fit together with one of the command handlers I found while reverse engineering `agent`: ![](../resources/start_diagclient_cmd.png)
+
+The environment variables mentioning ssh
 
 ### Network Diagram
 A good portion of this task was just attempting to map out roughly what the network looked like. This is the final Diagram that I ended up with, including some information from task 8 and task 9. Note that in this diagram the blue connctions are essentially just me re-creating the connections to the C2 infrastructure that would normally be created by the device.

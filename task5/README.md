@@ -196,10 +196,11 @@ dropper:       ELF 64-bit LSB executable, ARM aarch64, version 1 (SYSV), statica
 No imports from `agent`, libc looks like it is linked in statically.
 
 # Reversing agent
-For any binary that I am reverse engineering, I find the most useful functions to identify are:
+For any binary that I am reverse engineering, I find that it is extremely useful to identify a few specific functions:
 - the `entrypoint`
 - logging/debug functions
 - functions that interact with the system (syscalls) if they are present
+- `memset`/`memcpy`/`memmove`/`str*`
 - constructors/destructors if they exist
 
 ## entrypoint
@@ -247,10 +248,28 @@ At that point I decided to just start off with the most common syscalls like `re
 
 Then I just picked out the syscall numbers that I cared about from [The chromium docs syscall table](https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md#arm64-64_bit) and manually changed those function names.
 
+## memset/memcpy issues
+I was able to identify `memset` and `memcpy` at specific callsites, but after a little while I realized that the arguments for those functions didn't allways match up. It turned out that the thunks for those functions were pointing to unadjusted pointers on the `Global Offset Table (GOT)`, which typically indicates an error processing relocations. Ghidra thought so too:
 
+![](../resources/ghidra_memset_got_plt_bug.png)
 
-## everything else
-I would like to say that I used a clever trick or feature of ghidra like Function ID databases to help with reverse engineering `agent`, but I didn't really have a ton of luck with them, and the few functions that I was able
+I never took the time to resolve this and ended up just working around it instead.
+
+## Agent functionality
+### Main
+- Reads and parses a config file passed in as an argument to the executable
+- allocates a struct (I named it `main_workstruct`) and stores specific vaues from the config file in the struct
+- starts three different threads, each of which starts with a log message stating what the name of the thread is
+  - `collect_thread`
+  - `upload_thread`
+  - `cmd_thread`
+- also does something related to disabling restart of `agent`
+
+### Collect Thread
+
+### Upload Thread
+
+### Cmd Thread
 
 
 # Reversing dropper

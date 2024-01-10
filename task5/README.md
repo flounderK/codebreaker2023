@@ -195,6 +195,85 @@ dropper:       ELF 64-bit LSB executable, ARM aarch64, version 1 (SYSV), statica
 
 No imports from `agent`, libc looks like it is linked in statically.
 
+# Tooling for the VM
+Everything in the device firmware is statically linked and `libc` and `ld.so` don't exist on the device, so getting tooling onto the device was a bit of a pain, but also incredibly useful.
+
+## Strace
+### Building for aarch64
+It turns out that cross compiling strace for aarch64 isn't difficult, but the `strace` project documentation is somewhat lacking.
+
+
+Install some deps
+```bash
+sudo apt install gcc-aarch64-linux-gnu
+sudo apt install crossbuild-essential-arm64
+sudo apt install crossbuild-essential-armel
+sudo apt install gcc-arm-linux-gnueabi gcc-arm-none-eabi
+
+# and vsftpd for the file transfer
+sudo apt install vsftpd
+```
+
+```bash
+git clone git@github.com:strace/strace.git
+cd strace
+./bootstrap
+mkdir build
+cd build
+LDFLAGS='-static -pthread' ARCH='aarch64' CC='aarch64-linux-gnu-gcc' ../configure --enable-mpers=no --host=aarch64-linux
+make -j4
+cd src
+tar -acf strace.tar strace
+gzip strace.tar
+sudo cp strace.tar.gz ~
+```
+
+## gdbserver
+If you aren't familliar with `gdbserver`, it is an extremely useful tool for debugging. It lets you debug processes on a remote device and allows you to connect over the network to that device with `gdb` or `gdb-multiarch`. Very convenient if you are creating a `gdbinit` or can't get normal `gdb` to work for the device you are trying to debug things on (like if the device only has statically compiled binaries on it or you want access to `gdb`'s `python` api on a system that you are having trouble building python on).
+
+### Building gdbserver
+`gdb` has a few dependencies that I wasn't aware of before, so here are all of the commands that I used to clone and build all of the code I needed to get a statically linked copy of `gdbserver`. Please note that the build process fails sometime after `gdbserver` completes building.
+```bash
+# clone and build static libraries for gmp
+
+hg clone https://gmplib.org/repo/gmp
+cd gmp
+./.bootstrap
+
+mkdir build
+cd build
+ARCH='aarch64' CC='aarch64-linux-gnu-gcc' LD='aarch64-linux-gnu-ld' CXX='aarch64-linux-gnu-g++' LDFLAGS='-static' ../configure --host=aarch64-gnu-linux
+make
+
+cd ../..
+
+# clone and build static libraries for mpfr
+git clone https://gitlab.inria.fr/mpfr/mpfr.git
+cd mpfr
+./autogen.sh
+mkdir build
+cd  build
+ARCH='aarch64' CC='aarch64-linux-gnu-gcc' LD='aarch64-linux-gnu-ld' CXX='aarch64-linux-gnu-g++' LDFLAGS='-static' ../configure --host=aarch64-gnu-linux  --with-gmp-build="$HOME/cloned/gmp/build"
+make
+
+cd ../..
+
+
+# clone and build static gdbserver using gmp and mpfr
+git clone https://sourceware.org/git/binutils-gdb.git
+cd binutils-gdb
+mkdir build
+cd build
+ARCH='aarch64' CC='aarch64-linux-gnu-gcc' LD='aarch64-linux-gnu-ld' CXX='aarch64-linux-gnu-g++' AR='aarch64-linux-gnu-ar' LDFLAGS='-static' ../configure --host=aarch64-gnu-linux --target=aarch64-gnu-linux --with-gmp-lib="$HOME/cloned/gmp/build/.libs/" --with-gmp-include="$HOME/cloned/gmp/build/" --with-mpfr-lib="$HOME/cloned/mpfr/build/src/.libs" --with-mpfr-include="$HOME/cloned/mpfr/src"
+make
+```
+
+### getting strace onto the target system
+I just hosted an `ftp` server on my laptop and ran this command on the vm:
+```bash
+ftpget -u clif -p '<redacted>' 192.168.1.23 strace.tar.gz
+```
+
 # Reversing agent
 For any binary that I am reverse engineering, I find that it is extremely useful to identify a few specific functions:
 - the `entrypoint`
@@ -266,6 +345,8 @@ I never took the time to resolve this and ended up just working around it instea
 - also does something related to disabling restart of `agent`
 
 ### Collect Thread
+- Sets up some sort of device
+Didn't really do much more reversing
 
 ### Upload Thread
 

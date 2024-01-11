@@ -334,6 +334,12 @@ I was able to identify `memset` and `memcpy` at specific callsites, but after a 
 
 I never took the time to resolve this and ended up just working around it instead.
 
+## Dynamic RE
+I also had a little bit of success using strace to get an idea of what was happening in `agent`
+```bash
+/strace -ff -o agent.strace  /agent/agent /agent/config
+```
+
 ## Agent functionality
 ### Main
 - Reads and parses a config file passed in as an argument to the executable
@@ -344,13 +350,22 @@ I never took the time to resolve this and ended up just working around it instea
   - `cmd_thread`
 - also does something related to disabling restart of `agent`
 
-### Collect Thread
-- Sets up some sort of device
-Didn't really do much more reversing
 
 ### Upload Thread
+- calls `setenv` for `DB_DATABASE`, `DB_COLLECTION`, `DB_URL` to values that I didn't find (it ended up being a bad idea to not try to find the values)
+- calls `execve` on a binary that I assumed was `dropper`
+
+### Collect Thread
+- Sets up some a device, presumably for data collection
 
 ### Cmd Thread
+- sets up a socket bound to udp port 9000
+- waits for new packets on a call to `pselect`
+- `read`s in the contents of `/agent/hmac_key` into a buffer embedded in `main_workstruct`
+- calls a function that eventually leads to lots of bitshifty math, so I took the liberty of assuming that the function was related to encryption and/or message authentication because it also took the `hmac_key` buffer in as a parameter and compared a value against it. I named this function `do_message_auth_and_decryption` and promptly avoided this function as much as possible
+- calls a function associated with the log messages `got command type=%s, nargs=%s` and `command failed`, which I named `handle_commands`
+![](../resources/ghidra_command_handler_log_msg.png)
+
 
 
 # Reversing dropper

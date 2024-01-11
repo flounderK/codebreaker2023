@@ -359,7 +359,7 @@ I also had a little bit of success using strace to get an idea of what was happe
 - Sets up some a device, presumably for data collection
 
 ### Cmd Thread
-- sets up a socket bound to udp port 9000
+- sets up a `socket`
 - waits for new packets on a call to `pselect`
 - `read`s in the contents of `/agent/hmac_key` into a buffer embedded in `main_workstruct`
 - calls a function that eventually leads to lots of bitshifty math, so I took the liberty of assuming that the function was related to encryption and/or message authentication because it also took the `hmac_key` buffer in as a parameter and compared a value against it. I named this function `do_message_auth_and_decryption` and promptly avoided this function as much as possible
@@ -367,6 +367,14 @@ I also had a little bit of success using strace to get an idea of what was happe
 ![](../resources/ghidra_command_handler_log_msg.png)
 
 
+### Reversing Command Handling
+If you aren't familiar with ghidra's automatic variable naming convention, it uses something similar to [hungarian notation](https://en.wikipedia.org/wiki/Hungarian_notation) to try to inform you about the types of the variables it has tried to recover. Usually. Sometimes, you end up with variables prefixed with `unaff` or `in_` like `unaff_x19`. These variables indicate uninitialized access to a variable as [this stackexchange question clarifies](https://reverseengineering.stackexchange.com/questions/25372/what-kind-of-function-creates-this-code-pattern). If you see these variables, there is a pretty good chance that a function is missing a parameter in its function signature or something was optimized and you need to enable `In Line` in a function signature. In the case of the `handle_commands` function, there were a few of these variables and it actually looked like they were left over from a `switch` statement where ghidra automatically enabled `In Line` on all of the targets of the jump table related to the `switch`.
+![](../resources/ghidra_unaff_registers_handle_commands.png)
+
+It ended up being much easier to just go to the different functions and look at them individually rather than trying to get ghidra to display them correctly, at least for the ones where things didn't look correct.
+![](../resources/ghidra_start_diagclient.png)
+
+The commands
 
 # Reversing dropper
 If you haven't had the misfortune to try to reverse-engineer something written in go in ghidra, I can't recommend it. Ghidra is meant to decompile code that was originally written in C or C++, and it does that pretty well overall. Some code can push ghidra to its limits at some points but even then you can usually find a way to make ghidra display the code decently. Go does a lot of things that just **break** ghidra's decompiler. It just violates too many of the assumptions that ghidra relies on about calling convention, stack-depth, stack accesses, etc. for it to actually work correctly. I'm sure that someone has figured out

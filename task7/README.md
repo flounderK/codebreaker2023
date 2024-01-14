@@ -12,85 +12,6 @@ SSH private key to authenticate to the jumpbox: user@external-support.bluehorizo
 Enter device IP addresses, one per line (don't guess)
 ```
 
-# Tooling for the VM
-Everything in the device firmware is statically linked and `libc` and `ld.so` don't exist on the device, so getting tooling onto the device was a bit of a pain, but also incredibly useful.
-
-## Strace
-### Building for aarch64
-It turns out that cross compiling strace for aarch64 isn't difficult, but the `strace` project documentation is somewhat lacking.
-
-
-Install some deps
-```bash
-sudo apt install gcc-aarch64-linux-gnu
-sudo apt install crossbuild-essential-arm64
-sudo apt install crossbuild-essential-armel
-sudo apt install gcc-arm-linux-gnueabi gcc-arm-none-eabi
-
-# and vsftpd for the file transfer
-sudo apt install vsftpd
-```
-
-```bash
-git clone git@github.com:strace/strace.git
-cd strace
-./bootstrap
-mkdir build
-cd build
-LDFLAGS='-static -pthread' ARCH='aarch64' CC='aarch64-linux-gnu-gcc' ../configure --enable-mpers=no --host=aarch64-linux
-make -j4
-cd src
-tar -acf strace.tar strace
-gzip strace.tar
-sudo cp strace.tar.gz ~
-```
-
-## gdbserver
-If you aren't familliar with `gdbserver`, it is an extremely useful tool for debugging. It lets you debug processes on a remote device and allows you to connect over the network to that device with `gdb` or `gdb-multiarch`. Very convenient if you are creating a `gdbinit` or can't get normal `gdb` to work for the device you are trying to debug things on (like if the device only has statically compiled binaries on it or you want access to `gdb`'s `python` api on a system that you are having trouble building python on).
-
-### Building gdbserver
-`gdb` has a few dependencies that I wasn't aware of before, so here are all of the commands that I used to clone and build all of the code I needed to get a statically linked copy of `gdbserver`. Please note that the build process fails sometime after `gdbserver` completes building.
-```bash
-# clone and build static libraries for gmp
-
-hg clone https://gmplib.org/repo/gmp
-cd gmp
-./.bootstrap
-
-mkdir build
-cd build
-ARCH='aarch64' CC='aarch64-linux-gnu-gcc' LD='aarch64-linux-gnu-ld' CXX='aarch64-linux-gnu-g++' LDFLAGS='-static' ../configure --host=aarch64-gnu-linux
-make
-
-cd ../..
-
-# clone and build static libraries for mpfr
-git clone https://gitlab.inria.fr/mpfr/mpfr.git
-cd mpfr
-./autogen.sh
-mkdir build
-cd  build
-ARCH='aarch64' CC='aarch64-linux-gnu-gcc' LD='aarch64-linux-gnu-ld' CXX='aarch64-linux-gnu-g++' LDFLAGS='-static' ../configure --host=aarch64-gnu-linux  --with-gmp-build="$HOME/cloned/gmp/build"
-make
-
-cd ../..
-
-
-# clone and build static gdbserver using gmp and mpfr
-git clone https://sourceware.org/git/binutils-gdb.git
-cd binutils-gdb
-mkdir build
-cd build
-ARCH='aarch64' CC='aarch64-linux-gnu-gcc' LD='aarch64-linux-gnu-ld' CXX='aarch64-linux-gnu-g++' AR='aarch64-linux-gnu-ar' LDFLAGS='-static' ../configure --host=aarch64-gnu-linux --target=aarch64-gnu-linux --with-gmp-lib="$HOME/cloned/gmp/build/.libs/" --with-gmp-include="$HOME/cloned/gmp/build/" --with-mpfr-lib="$HOME/cloned/mpfr/build/src/.libs" --with-mpfr-include="$HOME/cloned/mpfr/src"
-make
-```
-
-### getting strace onto the target system
-I just hosted an `ftp` server on my laptop and ran this command on the vm:
-```bash
-ftpget -u clif -p '<redacted>' 192.168.1.23 strace.tar.gz
-```
-
 # connect to the new server
 ip address answer from the previous problem: 100.90.12.106
 
@@ -108,35 +29,22 @@ all user device ips are in the 100.64.0.0/12 range, meaning the second octet has
 I initially started trying to portscan the ip address answer from the previous problem (100.90.12.106) with [this script](scanallports.sh). While technically the script works, it was extremely slow and it never actually finished scanning. I was however able to find the openssh server on port 22 with the script.
 
 This somewhat fit together with one of the command handlers I found while reverse engineering `agent`: ![](../resources/start_diagclient_cmd.png)
-
-The environment variables mentioning ssh
+The environment variables mentioning ssh helped me recognize that `agent` or something that it called `execve` on was using `ssh` at some point, so I decided to try to track down what was actually using `ssh`.
 
 ### Network Diagram
-A good portion of this task was just attempting to map out roughly what the network looked like. This is the final Diagram that I ended up with, including some information from task 8 and task 9. Note that in this diagram the blue connctions are essentially just me re-creating the connections to the C2 infrastructure that would normally be created by the device.
+A good portion of this task was just understanding what the network looked like, so I started to make a diagram. This is the final Diagram that I ended up with, including some information from task 8 and task 9. Note that in this diagram the blue connctions are essentially just me re-creating the connections to the C2 infrastructure that would normally be created by the device.
 ![Network Diagram](../resources/Codebreaker23-Network-Diagram-With-Sections.drawio.png "Network Diagram")
 
+## Trying to run diagclient
+While reversing `agent` for task 5, I identified that one of the commands that it was set up to handle starts the binary `/agent/diagclient` after setting a few environment variables.
 
-SSH is being used to wrap an http server
-```
-ssh -o "IdentitiesOnly=yes" -i ~/.ssh/jumpbox.key -L 7999:100.90.12.106:22 user@external-support.bluehorizonmobile.com
-```
-
-```
-ssh-keyscan -p 7999 localhost > host_pub_keys
-socat tcp-listen:50505,reuseaddr exec:'ssh -o "IdentitiesOnly=yes" -i ./id_ed25519 -p 7999 nonroot_user@localhost'
-```
-
-```
-curl -X POST -d '{"StatusData":{"BalloonID":[255,97,231,205,75,91,73,13,135,118,173,49,248,145,248,145],"SystemInfo":null},"CommandResponse":{"Id":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"Starttime":"","Endtime":"","Cmd":"ip a","Stdout":"","Stderr":"","Err":""}}' http://localhost:50505/diagnostics
-```
-
-## diagclient Environment variables
+diagclient Environment variables:
 ```
 SSH_USERNAME=nonroot_user
 BALLOON_ID=<some-uuid>
 PRIVATE_KEY_PATH=<path-to-id_ed25519>
 
-export EXPECTED_HOST_KEY=$(cat expected_host_keys )
+export EXPECTED_HOST_KEY=$(cat <expected_host_key>)
 
 # guessing now
 
@@ -144,15 +52,107 @@ SSH_SERVER_ADDRESS
 SSH_SERVER_PORT
 ```
 
+At first I tried to set all of the environment variables and just run `diagclient` from the vm:
 ```
-BALLOON_ID=ff61e7cd-4b5b-490d-8776-ad31f891f891 SSH_USERNAME=nonroot_user PRIVATE_KEY_PATH=/private/id_ed25519 EXPECTED_HOST_KEY=/etc/dropbear/dropbear_ecdsa_host_key SSH_SERVER_ADDRESS=192.168.86.23 SSH_SERVER_PORT=22 /agent/diagclient -v 1
-
-
 BALLOON_ID=ff61e7cd-4b5b-490d-8776-ad31f891f891 SSH_USERNAME=nonroot_user PRIVATE_KEY_PATH=/private/id_ed25519 EXPECTED_HOST_KEY=/openssh_ed25519_host_key SSH_SERVER_ADDRESS=192.168.86.23 SSH_SERVER_PORT=22 /agent/diagclient -v 1
 ```
 
-agent is listening on udp/9000
+But it kept returning
+```
+[diagclient] 1970/01/01 00:14:14.061021 logging enabled
+[diagclient] 1970/01/01 00:14:14.066747 Failed to parse host key: ssh: no key found
+```
 
+I eventually got a little bit further when I realized that `EXPECTED_HOST_KEY` was actually supposed to be the contents of a key rather than the filepath, but it still didn't entirely work.
+
+```
+[diagclient] 1970/01/01 00:16:00.831480 logging enabled
+[diagclient] 1970/01/01 00:16:01.003133 Failed to connect to SSH server: ssh: handshake failed: ssh: host key mismatch
+```
+
+While I couldn't get `diagclient` to connect, I tried to connect to the `ssh` server myself and realized that I was actually able to
+```
+ssh -o "IdentitiesOnly=yes" -i ~/.ssh/jumpbox.key -L 0.0.0.0:7999:100.90.12.106:22 user@external-support.bluehorizonmobile.com
+```
+
+```
+ssh -o "IdentitiesOnly=yes" -i ./id_ed25519 -p 7999 nonroot_user@localhost
+```
+
+Where I saw a message similar to this one after connecting:
+```
+2023/11/04 18:14:22 Diagnostic Server starting...
+```
+
+along with the message `malformed HTTP request ""`.
+
+To make interacting with the server a little more sane, I ended up configuring `socat` to execute the `ssh` command to connect to the server and pipe interactions with port 50505 to the established stdin/stdout of the `ssh` session, that way I could interact with the server using `curl` and other tools for making web requests.
+```
+ssh -o "IdentitiesOnly=yes" -i ~/.ssh/jumpbox.key -L 0.0.0.0:7999:100.90.12.106:22 user@external-support.bluehorizonmobile.com
+```
+
+```
+socat tcp-listen:50505,reuseaddr exec:'ssh -o "IdentitiesOnly=yes" -i ./id_ed25519 -p 7999 nonroot_user@localhost'
+```
+
+This worked out very well, but I always ended up with a `404` error:
+```
+curl http://localhost:50505/robots.txt
+404 page not found
+```
+
+So I decided that it was probably necessary to figure out what kind of interactions `diagclient` was supposed to be having with the server.
+
+## Reversing diagclient
+I definitely don't have a complete picture of how this works, but as I understand it `diagclient`:
+- gets a listing of processes/info from the system
+- serializes the data into json
+- `POST`s the json to `http://<ip-addr>/diagnostics` and receives a json response that looks like `{"id":"00000000-0000-0000-0000-000000000000","cmd_name":"","cmd_args":null}`
+- if there is a `cmd_name` and `cmd_args` specified, it would execute the command.
+
+
+### Running diagclient
+Thinking through a little bit about what was happening with `diagclient` I realized that if there was an `EXPECTED_HOST_KEY`, the client was probably trying to ensure that the server it connected to was the actual attacker controlled server.
+Eventually I ended up running `ssh-keyscan` to try to get all of the host keys that the server accepted, then just tried them in `EXPECTED_HOST_KEY` until one worked.
+```
+ssh -o "IdentitiesOnly=yes" -i ~/.ssh/jumpbox.key -L 0.0.0.0:7999:100.90.12.106:22 user@external-support.bluehorizonmobile.com
+```
+
+```
+ssh-keyscan -p 7999 localhost > host_pub_keys
+```
+
+```bash
+BALLOON_ID=ff61e7cd-4b5b-490d-8776-ad31f891f891 SSH_USERNAME=nonroot_user PRIVATE_KEY_PATH=/private/id_ed25519 \
+EXPECTED_HOST_KEY=$(cat expected_host_key) SSH_SERVER_ADDRESS=192.168.86.23 SSH_SERVER_PORT=7999 \
+/agent/diagclient -v 1
+```
+
+And the output looked something like this (though this output is from after the competition because I didn't think to save the output while I was working):
+```
+[diagclient] 1970/01/01 00:37:21.479305 logging enabled
+[diagclient] 1970/01/01 00:37:21.828963 connected
+[diagclient] 1970/01/01 00:37:21.867904 opened session
+[diagclient] 1970/01/01 00:37:21.869106 Enabled stderr logging from server
+[diagclient] 1970/01/01 00:37:21.870954 collect SystemInfo
+2024/01/14 17:39:01 Diagnostic Server starting...
+[diagclient] 1970/01/01 00:37:22.258475 create StatusUpdate
+[diagclient] 1970/01/01 00:37:22.259209 writing request
+[diagclient] 1970/01/01 00:37:22.267353 wrote request
+[diagclient] 1970/01/01 00:37:26.980909 wait for server logs...
+2024/01/14 17:39:06 ready
+{diagserver} 2024/01/14 17:39:06.690433 Starting connection timer...
+{diagserver} 2024/01/14 17:39:06.690611 received StatusUpdate without CommandResponse
+{diagserver} 2024/01/14 17:39:06.690636 json encoded next command: [123 34 105 100 34 58 34 48 48 48 48 48 48 48 48 45 48 48 48 48 45 48 48 48 48 45 48 48 48 48 45 48 48 48 48 48 48 48 48 48 48 48 48 34 44 34 99 109 100 95 110 97 109 101 34 58 34 34 44 34 99 109 100 95 97 114 103 115 34 58 110 117 108 108 125] err: <nil>
+{diagserver} 2024/01/14 17:39:06.690648 HTTP/1.1 200 OK
+{diagserver} 2024/01/14 17:39:06.690652 Content-Length: 75
+{diagserver} 2024/01/14 17:39:06.690655 server to client body: {"id":"00000000-0000-0000-0000-000000000000","cmd_name":"","cmd_args":null}
+[diagclient] 1970/01/01 00:37:27.984856 wait for server logs...done
+[diagclient] 1970/01/01 00:37:27.987149 response: &{200 OK 200 HTTP/1.1 1 1 map[Content-Length:[75]] 0x4000349300 75 [] false false map[] 0x4000360f00 <nil>}
+[diagclient] 1970/01/01 00:37:27.995793 No next command. Done.
+```
+
+## Interacting with the server and finding the bug
 
 ```python
 import requests
@@ -182,19 +182,6 @@ Curl should look closer to :
 ```
 curl -X POST -d '{"status_data":{"balloon_id":"00000000-0000-0000-0000-000000000000","system_info":null}}' http://localhost:50505/diagnostics
 ```
-
-
-```
-2023/11/02 21:56:30 socat[2273358] E waitpid(): child 2273359 exited with status 1
-Pseudo-terminal will not be allocated because stdin is not a terminal.
-2023/11/03 01:59:27 Diagnostic Server starting...
-2023/11/03 01:59:32 ready
-{diagserver} 2023/11/03 01:59:32.757428 Starting connection timer...
-{diagserver} 2023/11/03 01:59:32.757496 parse "/%2e%2e%2fhome%2fnonroot_user%2f%2e%ssh%2fauthorized_keys": invalid URL escape "%ss"
-2023/11/02 21:59:26 socat[2273577] E waitpid(): child 2273578 exited with status 1
-```
-
-This is a message from a go module, which is pretty strict about percent signs
 
 
 Then I noticed the message `received StatusUpdate without CommandResponse`
@@ -353,4 +340,6 @@ and by using `requests.session` to share the session, I also avoided having to f
 [+] found ip 100.69.183.56
 [*] Stopped process '/usr/bin/socat' (pid 2399544)
 ```
+
+My solve script for this can be found in [enumerate_ips.py](enumerate_ips.py)
 

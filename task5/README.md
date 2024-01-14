@@ -374,17 +374,69 @@ If you aren't familiar with ghidra's automatic variable naming convention, it us
 It ended up being much easier to just go to the different functions and look at them individually rather than trying to get ghidra to display them correctly, at least for the ones where things didn't look correct.
 ![](../resources/ghidra_start_diagclient.png)
 
-The commands
+From there I was able to follow the flow of data pretty well and Identify the structure of the commands
+
+### Agent Commands
+
+- each arg is a char[0x40] buffer,
+- max of 10 args
+
+#### 0: stop waiting for other threads and remove restart file
+- sets two fields in `main_workstruct`
+- on return to `main`, these fields would be checked and would stop all of the other threads and remove the `agent_restart` file
+
+#### 1: Run diagclient
+- `fork`s
+- runs `setsid`
+- runs `setenv` for the following values
+  - `SSH_SERVER_ADDRESS` to a value from the command packet
+  - `SSH_SERVER_PORT` to a value from the command packet
+  - `PRIVATE_KEY_PATH` to `/private/id_ed25519` from the `config` file
+  - `SSH_USERNAME` to `nonroot_user` (hardcoded as a string in the binary)
+  - `EXPECTED_HOST_KEY` to a value from the command packet
+  - `BALLOON_ID` to the contents of `/private/id.txt` from the `config` file
+- calls `execve` on `/agent/diagclient` (hardcoded)
+- `exit`s in the child process
+
+
+#### 2: update hmac
+- `opens` the file `/agent/hmac_key` from the `config` file
+- `write`s a string from teh command packet into the file
+- `close`s file
+
+#### 3: set collect enabled
+- sets `collect_enabled` to 1 in `main_workstruct`
+
+#### 4: set collect disabled
+- sets `collect_enabled` to 0 in `main_workstruct`
+
+#### 5: send message to navigation
+- opens a `socket` with `socket(AF_UNIX, SOCK_DGRAM, 0)`
+- sets the `dest` addr to `main_workstruct->navigate_ipc` (`/tmp/nav_service.unix` from `config` file)
+- sends a 31 byte `buffer`, unsure what the contents mean
+
+#### 6: stop waiting for other threads
+- sets a field in `main_workstruct` that will stop the program from waiting for other threads on return to `main`
+
+#### 7: change collectors
+- `strndup`s up to 3 string values from command packet and writes them to the 3 `collector` fields in `main_workstruct`
+
 
 # Reversing dropper
-If you haven't had the misfortune to try to reverse-engineer something written in go in ghidra, I can't recommend it. Ghidra is meant to decompile code that was originally written in C or C++, and it does that pretty well overall. Some code can push ghidra to its limits at some points but even then you can usually find a way to make ghidra display the code decently. Go does a lot of things that just **break** ghidra's decompiler. It just violates too many of the assumptions that ghidra relies on about calling convention, stack-depth, stack accesses, etc. for it to actually work correctly. I'm sure that someone has figured out
-I found the github repo [https://github.com/mooncat-greenpy/Ghidra_GolangAnalyzerExtension](https://github.com/mooncat-greenpy/Ghidra_GolangAnalyzerExtension) to be extremely valuable for reverse engineering go.
+If you haven't had the misfortune to try to reverse-engineer something written in go in ghidra, I can't recommend it. Ghidra is meant to decompile code that was originally written in C or C++, and it does that pretty well overall. Some code can push ghidra to its limits at some points but even then you can usually find a way to make ghidra display the code decently. Go does a lot of things that just **break** ghidra's decompiler. It just violates too many of the assumptions that ghidra relies on about calling convention, stack-depth, stack accesses, etc. for it to actually work correctly. I'm sure that someone has figured out how to make ghidra handle things better, but I haven't found a good way to make it work yet. **Update:** Ghidra 11.0 was released in late December. It helped a tiny bit, but not quite enough to make a difference here.
+
+I found the github repo [https://github.com/mooncat-greenpy/Ghidra_GolangAnalyzerExtension](https://github.com/mooncat-greenpy/Ghidra_GolangAnalyzerExtension) to be extremely valuable for reverse engineering go. I'm not sure what all the extension does, but it appears to recover some of the type information for go types which can be applied to variables in ghidra.
+
+One of the more useful tricks that I used for go reversing was to middle click on the integer offset from the current stack head to highlight that stack offset across the whole function. While it didn't make things look like ghidra's normal decompiler output for programs written in c/c++, it did help to track variables, which was significantly better from where I was before.
+![](../resources/ghidra_go_offset_highlight.png)
+
+Overall I didn't really get a great understanding of what this binary does beyond reading in some sort of config and connecting to a server with `TLS`.
 
 
 # Answer
-I almost entirely reverse engineered `agent` partially reverse engineered `dropper`, and found nothing after around 8 hourse of reversing.
+I reverse engineered a massive portion of `agent`, partially reverse engineered `dropper`, and found very little pertaining to the task solution after around 8 hours of reversing...
 
-It was a `bz2` compressed blob at the end of `dropper` that was extractable with `binwalk`.
+It was a `bz2` compressed blob at the end of `dropper` that was extractable with `binwalk`...
 
 Anyway here is the compressed data:
 ```

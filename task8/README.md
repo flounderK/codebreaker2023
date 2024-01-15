@@ -84,94 +84,15 @@ To help narrow down where to look in `agent` for that kind of flaw, I decided to
 - Uncover and document the stages and different forms of the "life" of the packet from when it is received all the way to where the commands encrypted in the packet are executed
 
 
+# Reversing the decryption and authentication functionality
+As shown above in the `binwalk` output, I was able to find some crypto constants used for `AES` and `SHA256` pretty quickly, so I started with those global variables and work my way from the functions that accessed them back to `do_message_authentication_and_decryption`. It helped a ton to just have those functions associated with their algorithms. For these two algorithms I went on github to find implementations to compare against the functions from `agent`. While none were an exact match, some of them had similar enough functionality to get a general idea of which functions were roughly equivalent.
 
-## Breakdown of data from the UDP packet:
-```c
-// size 0x60
-struct CommandHeader {
-    byte ecc_encrypted_seed[0x40];
-    byte hmac[0x20];
-    byte payload[0];
-}
+I also noticed a function accessing a different global, which turned out to be a constant for `NIST-P256` elliptic curve cryptography. I wasn't very familiar with `ECC` before this so I spent some time learning about how it is used and I learned that it is used for modern key-exchange algorithms. The fact that a key-exchange algorithm would be used in something using `udp` also stuck out to me as a potential issue, as `udp` is `connectionless`. It also seemed extremely wrong to have something related to a key exchange in the same packet as an encrypted message (which presumably used that key).
 
-```
-
-```
-NIST-P256 Elliptic Curve Cryptography data:
-    - 0x40 (64) bytes
-
-00000000: 6b17 d1f2 e12c 4247 f8bc e6e5 63a4 40f2  k....,BG....c.@.
-00000010: 7703 7d81 2deb 33a0 f4a1 3945 d898 c296  w.}.-.3...9E....
-00000020: 4fe3 42e2 fe1a 7f9b 8ee7 eb4a 7c0f 9e16  O.B........J|...
-00000030: 2bce 3357 6b31 5ece cbb6 4068 37bf 51f5  +.3Wk1^...@h7.Q.
-
-HMAC hash
-    - (sha256sum of a manipulated unknown hmac key and the plaintext for the AES encrypted buffer)
-    - 0x20 (32) bytes
-
-00000040: 9aaa 943b 66fa ed7e af57 c1cf 35e3 c88f  ...;f..~.W..5...
-00000050: e7ef 2080 0985 0798 ae0c a530 502c f43f  .. ........0P,.?
-
-AES Encrypted buffer
-    - (key is determined based on the ECC data in the packet)
-    - 0xc0 (192) bytes
-
-00000060: ba46 1296 20f9 1e37 42af e650 cee2 7b8d  .F.. ..7B..P..{.
-00000070: 9e81 804f 081e 254d 686e 9577 72d2 3e23  ...O..%Mhn.wr.>#
-00000080: 6cb1 00e3 f74e 6cf5 76f0 5d4d 4a58 3e50  l....Nl.v.]MJX>P
-00000090: ef6e 8b00 c450 5e93 baaf 92d2 1a00 9b6d  .n...P^........m
-000000a0: 711f 70a3 bfb6 18fe 71bc 1729 e04b 318d  q.p.....q..).K1.
-000000b0: f7f2 1875 e437 eebe 5b58 5643 88bf 444d  ...u.7..[XVC..DM
-000000c0: 2769 3f48 fba7 8e3a 2866 d902 4c83 1203  'i?H...:(f..L...
-000000d0: a59c f8b5 db71 7f03 881c 9ea2 22bc e178  .....q......"..x
-000000e0: fa5c f9ca 0bbc 1b2a 0caf 67ea ac95 38be  .\.....*..g...8.
-000000f0: b233 9658 f86f 6504 a0a5 cd3c 672d 2398  .3.X.oe....<g-#.
-00000100: f16f 6e7d f867 51e1 c008 d792 c068 9dae  .on}.gQ......h..
-00000110: 7db1 cc16 9179 1a4a a471 c1b6 288a ef09  }....y.J.q..(...
-```
-
-
-`ecc_p256_public.bin`
-```
-00000000: 894d 6341 662a 70e3 d4f8 467c 9b25 7bbc  .McAf*p...F|.%{.
-00000010: 0ff2 f558 a241 6335 c7d4 8845 532c 8ca6  ...X.Ac5...ES,..
-00000020: e172 6175 fb50 ef22 8aa6 55a2 3793 4b8b  .rau.P."..U.7.K.
-00000030: 2969 912d 7f29 118d 8b64 bf2d 73f8 d5b8  )i.-.)...d.-s...
-```
-
-- ecc_p256_private.bin is 0x60 bytes
-- hmac key is 0x40 bytes
-    - (can technically be larger or smaller, just so long as it is a string of at least one non-null byte),
-    - the update-hmac command is only capable of sending a 0x40 byte hmac
-
-- ecc decrypted data is 0x20 bytes
-
-# TODO
-- identify the format of the ecc_p256_public key
-
-
-# Packet structure
-After looking at the command handler functions it is pretty clear that this is the structure of the command payload:
-```
-// size 0x60
-struct CommandHeader {
-    byte ecc_encrypted_seed[0x40];
-    byte hmac[0x20];
-    byte payload[0];
-}
-
-
-// size 0x80+,
-struct CommandPayload {
-    char command_type_str[0x40];  // this can only actually be the string representation of an integer from 0-7
-    char nargs_str[0x40];         // string representing a number of arguments from 0-10
-    char args[strtol(nargs_str, 0, 10)][0x40];           // Variable size
-}
-
-```
-
+I tried to match up some of the functions between the implementation of `p256` in `agent` and implementations that I found on github, but they were all different enough that I couldn't really identify any specific functions, so I decided to come back to that part later and work on mapping out a general flow for packet decryption first.
 
 # Decryption Flow
+```
 ecc priv key (first 0x20 bytes is used as point coordinates )
 |
 V
@@ -187,7 +108,7 @@ hash is split up and used to seed AES decryption of packet +0x60 bytes
 
 
 
-AES 128 block-based decryption
+AES block-based decryption
 
 
 ECC HASH (first 16 bytes)
@@ -242,16 +163,86 @@ sha256  <--- xord_hmac_buf B (0x5c)
 |
 V
 compared with hmac at 0x40 in packet
+```
 
+**NOTE: This diagram may be replaced with a slightly more sane one in the near future**
+
+
+# Packet structure
+After looking at the command handler functions it is pretty clear that this is the structure of the command payload:
+```c
+// size 0x60
+struct CommandHeader {
+    byte ecc_encrypted_seed[0x40];
+    byte hmac[0x20];
+    byte payload[0];
+}
+
+
+// size 0x80+,
+struct CommandPayload {
+    char command_type_str[0x40];  // this can only actually be the string representation of an integer from 0-7
+    char nargs_str[0x40];         // string representing a number of arguments from 0-10
+    char args[strtol(nargs_str, 0, 10)][0x40];           // Variable size
+}
+
+```
+
+
+## Breakdown of data from the UDP packet:
+
+```
+NIST-P256 Elliptic Curve Cryptography data:
+    - 0x40 (64) bytes
+
+00000000: 6b17 d1f2 e12c 4247 f8bc e6e5 63a4 40f2  k....,BG....c.@.
+00000010: 7703 7d81 2deb 33a0 f4a1 3945 d898 c296  w.}.-.3...9E....
+00000020: 4fe3 42e2 fe1a 7f9b 8ee7 eb4a 7c0f 9e16  O.B........J|...
+00000030: 2bce 3357 6b31 5ece cbb6 4068 37bf 51f5  +.3Wk1^...@h7.Q.
+
+HMAC hash
+    - (sha256sum of a manipulated unknown hmac key and the plaintext for the AES encrypted buffer)
+    - 0x20 (32) bytes
+
+00000040: 9aaa 943b 66fa ed7e af57 c1cf 35e3 c88f  ...;f..~.W..5...
+00000050: e7ef 2080 0985 0798 ae0c a530 502c f43f  .. ........0P,.?
+
+AES Encrypted buffer
+    - (key is determined based on the ECC data in the packet)
+    - 0xc0 (192) bytes
+
+00000060: ba46 1296 20f9 1e37 42af e650 cee2 7b8d  .F.. ..7B..P..{.
+00000070: 9e81 804f 081e 254d 686e 9577 72d2 3e23  ...O..%Mhn.wr.>#
+00000080: 6cb1 00e3 f74e 6cf5 76f0 5d4d 4a58 3e50  l....Nl.v.]MJX>P
+00000090: ef6e 8b00 c450 5e93 baaf 92d2 1a00 9b6d  .n...P^........m
+000000a0: 711f 70a3 bfb6 18fe 71bc 1729 e04b 318d  q.p.....q..).K1.
+000000b0: f7f2 1875 e437 eebe 5b58 5643 88bf 444d  ...u.7..[XVC..DM
+000000c0: 2769 3f48 fba7 8e3a 2866 d902 4c83 1203  'i?H...:(f..L...
+000000d0: a59c f8b5 db71 7f03 881c 9ea2 22bc e178  .....q......"..x
+000000e0: fa5c f9ca 0bbc 1b2a 0caf 67ea ac95 38be  .\.....*..g...8.
+000000f0: b233 9658 f86f 6504 a0a5 cd3c 672d 2398  .3.X.oe....<g-#.
+00000100: f16f 6e7d f867 51e1 c008 d792 c068 9dae  .on}.gQ......h..
+00000110: 7db1 cc16 9179 1a4a a471 c1b6 288a ef09  }....y.J.q..(...
+```
+
+
+`ecc_p256_public.bin`
+```
+00000000: 894d 6341 662a 70e3 d4f8 467c 9b25 7bbc  .McAf*p...F|.%{.
+00000010: 0ff2 f558 a241 6335 c7d4 8845 532c 8ca6  ...X.Ac5...ES,..
+00000020: e172 6175 fb50 ef22 8aa6 55a2 3793 4b8b  .rau.P."..U.7.K.
+00000030: 2969 912d 7f29 118d 8b64 bf2d 73f8 d5b8  )i.-.)...d.-s...
+```
+
+
+
+# Implications of packet structure and decryption flow
 
 This flow means that the hmac key is technically brute force-able without having the ecc p256 private key so long as you know the contents of the aes encrypted buffer ahead of time. Because the serialization of the arguments for each command is a series of char[0x40] buffers and the inputs are strings or have a fairly clear deserialization process, a pretty good guess at the contents of any given payload can be made solely based on the size of the encrypted packet. It is also dependent on the HMAC not being encrypted, which it isn't in this case. (update, this is not feasible because the packet appears to be an hmac-update command, meaning that there is no way to know the contents of the packet ahead of time).
 
-remaining candidates for crypto weaknesses in this:
-- points specified for the ecc might not be diverse enough. It looks like the point specified in the private key might be passed in twice, which seems... unwise
-- I have not fully reversed the code, but based on the fact that the ecc code is calling a `random` equivalent and nist p256 appears to normally be meant for key exchanges, i think it might be possible that the ecc code is performing a "key exchange" all locally. If this is the case then there is a major weakness in the encryption
-- it looks like the aes key that is output from ecc decryption isn't entirely used (as in, some portions of the 32 bytes are zeroed out before being used, which would reduce keyspace somewhat). update, looks like it is just using aes-128 so this is fine
+It might be possible that the ecc code is performing a "key exchange" all locally. If this is the case then there is a major weakness in the encryption
 
-After looking online at a basic aes implementation (https://github.com/kokke/tiny-AES-c/tree/master), it looks like the expanded key size for aes 128 is 176 bytes and the key length is 16 bytes, which matches what I see in `agent`.
+After looking online at a [basic aes implementation](https://github.com/kokke/tiny-AES-c), it looks like the expanded key size for aes 128 is 176 bytes and the key length is 16 bytes, which matches what I see in `agent`.
 
 
 # possible AES Modes:

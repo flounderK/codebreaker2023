@@ -1,7 +1,8 @@
 
+# install gdb-multiarch on the container with `apt update && apt upgrade -y && apt install -y gdb-multiarch`
 # start with 'gdb-multiarch -x gdbinit_agent' on docker container
 # and `./gdbserver-aarch64 :1234 /agent/agent /agent/config` on the qemu guest
-# pipe packets in from the docker container with 'cat packet_2.bin | nc -u 10.101.255.254 9000'
+# pipe packets in from the docker container with 'cat packet_data.bin | nc -u 10.101.255.254 9000'
 unset env LINES
 unset env COLUMNS
 set height 0

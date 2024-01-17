@@ -20,6 +20,9 @@ The following challenge content is a PURELY FICTIONAL SCENARIO created by the NS
 Any similarities to real persons, entities, or events is coincidental.
 
 # Writeups by task
+
+Please note that some parts of this writeup are still WIP
+
 - [Task 1 - Find the Unknown Object - (General programming, database retrieval)](/task1/README.md)
 - [Task 2 - Extract the Firmware - (Hardware analysis, Datasheets)](/task2/README.md)
 - [Task 3 - Analyze the Firmware - (Emulation)](/task3/README.md)

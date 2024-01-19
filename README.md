@@ -33,6 +33,8 @@ Please note that some parts of this writeup are still WIP
 - [Task 8 - Decrypt the Comms - (Reverse Engineering, Cryptography)](/task8/README.md)
 - [Task 9 - Stop the Devices - (Reverse Engineering, Cryptography)](/task9/README.md)
 
+A big thanks to the folks at the NSA who put this together, it was a great time.
+
 
 # Highlights
 - Most of the reversing can be found in the [task 5](/task5/README.md) and [task 8](/task8/README.md) writeups

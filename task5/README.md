@@ -372,7 +372,7 @@ If you aren't familiar with ghidra's automatic variable naming convention, it us
 ![](../resources/ghidra_unaff_registers_handle_commands.png)
 
 It ended up being much easier to just go to the different functions and look at them individually rather than trying to get ghidra to display them correctly, at least for the ones where things didn't look correct.
-![](../resources/ghidra_start_diagclient.png)
+![](../resources/ghidra_run_diagclient_command.png)
 
 From there I was able to follow the flow of data pretty well and Identify the structure of the commands
 

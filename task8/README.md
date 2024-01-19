@@ -87,12 +87,53 @@ To help narrow down where to look in `agent` for that kind of flaw, I decided to
 # Reversing the decryption and authentication functionality
 As shown above in the `binwalk` output, I was able to find some crypto constants used for `AES` and `SHA256` pretty quickly, so I started with those global variables and work my way from the functions that accessed them back to `do_message_authentication_and_decryption`. It helped a ton to just have those functions associated with their algorithms. For these two algorithms I went on github to find implementations to compare against the functions from `agent`. While none were an exact match, some of them had similar enough functionality to get a general idea of which functions were roughly equivalent.
 
-I also noticed a function accessing a different global, which turned out to be a constant for `NIST-P256` elliptic curve cryptography. I wasn't very familiar with `ECC` before this so I spent some time learning about how it is used and I learned that it is used for modern key-exchange algorithms. The fact that a key-exchange algorithm would be used in something using `udp` also stuck out to me as a potential issue, as `udp` is `connectionless`. It also seemed extremely wrong to have something related to a key exchange in the same packet as an encrypted message (which presumably used that key).
+I also noticed a function accessing a different global, which turned out to be a constant for `NIST-P256` elliptic curve cryptography. I wasn't very familiar with `ECC` before this so I spent some time learning about how it is used and I learned that it is used for modern  [key-exchange](https://en.wikipedia.org/wiki/Key_exchange) algorithms. The fact that a key-exchange algorithm would be used in something using `udp` also stuck out to me as a potential issue, as `udp` is `connectionless`. It also seemed extremely wrong to have something related to a key exchange in the same packet as an encrypted message (which presumably used that key).
 
 I tried to match up some of the functions between the implementation of `p256` in `agent` and implementations that I found on github, but they were all different enough that I couldn't really identify any specific functions, so I decided to come back to that part later and work on mapping out a general flow for packet decryption first.
 
 
-[key exchanges on wikipedia](https://en.wikipedia.org/wiki/Key_exchange)
+## Mapping out the decryption flow through dynamic analysis
+I initially tried to statically compile [frida](https://github.com/frida/frida) for `aarch64`, but the project doesn't officially support that quite yet and when I tried to hack it in I ran into a lot of issues and eventually gave up.
+Instead, I used the `gdbserver` that I compiled for `aarch64` earlier. `gdb` allows you to specify an `init` file that will execute when you run `gdb` with `gdb -x initfile`. Somewhat recently I learned that you can have `gdb` execute certain commands when it reaches breakpoints with something that looks like this:
+```
+# base address of the binary
+set $BINBASE = 0x0
+
+# create a convenience variable containing the address of the function `sha256_ctx_init`
+set $BP_sha256_ctx_init = $BINBASE + 0x0040b790
+
+# create a new breakpoint at the address of `sha256_ctx_init`
+b *$BP_sha256_ctx_init
+# upon reaching the breakpoint, execute the following commands
+commands
+    # reduce verbosity (don't print out the commands as they execute)
+    silent
+    # print the name of the function and the contents of the register x0
+    printf "SHA256_ctx_Init %p\n", $x0
+    # continue execution
+    continue
+# stop executing commands after the breakpoint
+end
+```
+
+This stub pretty much just prints out values when code reaches the breakpoint and continues execution. It isn't exactly fast, but it does work. I made a bunch of breakpoints like this at the start of functions and at the locations where the functions returned to print out information like the register values that were passed in to functions as parameters, the contents of buffers if those values were pointers, and the return values after functions returned. I also ended up writing a very small `python` script to interact with the `gdb` api so that I could get a more readable hexdump. If you are interested in seeing the gdbinit file that I used, it is [here](../dockerdir/gdbinit_agent).
+
+To actually run the server, I ran this command on the qemu guest:
+```
+./gdbserver-aarch64 :1234 /agent/agent /agent/config
+```
+
+and I ran this command on the docker container (after installing `gdb-multiarch`):
+```
+gdb-multiarch -x gdbinit_agent
+```
+
+Then to send the packet through to udp port 9000, I ran this command in a different terminal on the docker container:
+```
+cat packet_data.bin | nc -u 10.101.255.254 9000
+```
+
+Then I followed the data in gdb and ghidra.
 
 # Decryption Flow
 ```
@@ -241,88 +282,12 @@ AES Encrypted buffer
 
 # Implications of packet structure and decryption flow
 
-This flow means that the hmac key is technically brute force-able without having the ecc p256 private key so long as you know the contents of the aes encrypted buffer ahead of time. Because the serialization of the arguments for each command is a series of char[0x40] buffers and the inputs are strings or have a fairly clear deserialization process, a pretty good guess at the contents of any given payload can be made solely based on the size of the encrypted packet. It is also dependent on the HMAC not being encrypted, which it isn't in this case.
+This flow means that the hmac key is technically guessable without having the ecc p256 private key so long as you know the contents of the aes encrypted buffer ahead of time. Because the serialization of the arguments for each command is a series of `char[0x40]` buffers and the inputs are strings or have a fairly clear de-serialization process, a pretty good guess at the contents of any given payload can be made solely based on the size of the encrypted packet. It is also dependent on the HMAC hash not being encrypted, which it isn't in this case.
 
+# Identifying Command packets before decryption
 
+## A brief review of the commands, with a little bit more information
 
-After looking online at a [basic aes implementation](https://github.com/kokke/tiny-AES-c), it looked like the expanded key size for aes 128 is 176 bytes and the key length is 16 bytes, which matched what I saw in `agent`.
-
-
-# possible AES Modes:
-## attributes of the aes impl
-- block cipher
-    - loops over the function that does decryption and decrypts 0x10 bytes at a time
-- 0x10 byte blocks
-- is AES 128
-- 176 byte expanded key
-- 10 rounds per block
-- 16 byte key
-    - key is the first 16 bytes of the sha256sum of the ecc-encrypted stuff once it is decrypted
-- Uses a 16 byte IV
-    - first 8 bytes are a portion of the sha256sum of the ecc-encrypted stuff once it is decrypted
-    - second 8 bytes can always be known and are just the little-endian index (starting at 1) of the round
-- only an SBox was found, not an inverse sbox, which I beleive indicates that the mode uses the same function for encryption as decryption
-
-
-## valid modes modes
-- OFB - matched initially on a live test, current best candidate, but pycryptodome doesn't match after the first run, so a whole new instance needs to be created with the updated IV every time
-- CTR - uses outer loop, and increments a value in its IV every time, could very easily be this. Confirmed, This works, it just needs very specific arguments in pycryptodome
-
-**AES is 128 bit in CTR mode**
-
-### Remaining Candidate modes
-- CBC - uses outer loop - did not match on initial test
-- OCB - does not use IV
-- CFB - did not match in a live test
-
-less likely
-- OPENPGP
-- SIV
-- GCM
-
-## incorrect modes
-- CCM - no message authentication is done
-- ECB - no outer loop
-- PCBC - doesn't do the ciphertext ^ plaintext thing for iv generation
-- EAX - does not use iv
-
-
-
-
-
-# commands
-
-- each arg is a char[0x40] buffer,
-- max of 10 args
-
-### 0 stop waiting for other threads and remove restart file
-- 0 args with arg check
-
-### 1 run diagclient
-- 4 args without args check
-
-### 2 update hmac
-- 1 arg with arg check
-
-### 3 set collect enabled
-- 2 args with arg check
-
-### 4 set collect disabled
-- 2 args with arg check
-
-### 5 send message to navigation
-- 3 args with arg check
-- args are (ip, port, "alt")
-- unsure what alt is
-
-### 6 stop waiting for other threads
-- no args no arg check
-
-### 7 change collectors
-- 3 args with arg check
-
-## Actual Packet
-Revisiting the command paylod structre from before:
 ```
 // size 0x80+,
 struct CommandPayload {
@@ -334,11 +299,64 @@ struct CommandPayload {
 }
 ```
 
-Because the packet provided only has `0xc0` bytes for its command payload, the only commands that could be valid would be `2` and `6`.
-`2` is the closest match because the number of arguments is necessary for that command is 1, and the size of the command payload header (0x80 bytes) and one argument adds up to 0xc0 bytes. `2` is also the only command that takes 1 argument, making this the only reasonable choice.
-`6` would technically be valid because there is no check for the number of arguments for command `6`, however it this was in the packet it would also mean that there is 0x40 bytes of extra useless data, which seems unlikely.
+There was one check before the `switch` statement that validated the command used and the number of arguments for the commands
+![](../resources/ghidra_command_handler_command_enum_check.png)
 
-So the actual decrypted contents of the command payload would looks something very similar to this (except with a real new HMAC key)
+- each arg is a char[0x40] buffer,
+- max of 10 args
+
+### 0: stop waiting for other threads and remove restart file
+- 0 args with arg check
+![](../resources/ghidra_set_unlink_command.png)
+
+And the `unlink` happens back in main:
+![](../resources/ghidra_unlink_in_main.png)
+
+### 1: Run diagclient
+- 4 args without args check
+![](../resources/ghidra_run_diagclient_command.png)
+
+### 2 update hmac
+- 1 arg with arg check
+![](../resources/ghidra_update_hmac_key_command.png)
+
+### 3 set collect enabled
+- 2 args with arg check
+![](../resources/ghidra_set_collectors_enabled_command.png)
+
+### 4 set collect disabled
+- 2 args with arg check
+
+### 5 send message to navigation
+- 3 args with arg check
+- args are (ip, port, "alt")
+- unsure what alt is
+![](../resources/ghidra_send_msg_to_navigation.png)
+
+### 6 stop waiting for other threads
+- no args no arg check
+![](../resources/ghidra_stop_agent_command.png)
+
+### 7 change collectors
+- 3 args with arg check
+![](../resources/ghidra_change_collectors.png)
+
+## Actual Packet
+Revisiting the command payload structure from before:
+```
+// size 0x80+,
+struct CommandPayload {
+    char command_type_str[0x40];  // this can only actually be the string
+                                  // representation of an integer from 0-7
+    char nargs_str[0x40];         // string representing a number of
+                                  // arguments from 0-10
+    char args[strtol(nargs_str, 0, 10)][0x40];    // Variable size
+}
+```
+
+Because the packet provided only has `0xc0` bytes for its command payload and the minimum size for a command would be `0x80`, the only commands that could be valid would be `2` and `6`. Command `2` is the closest match because the number of arguments is necessary for that command is `1`, and the size of the command payload header (0x80 bytes) and one argument adds up to `0xc0` bytes. Command `2` is also the only command that takes `1` argument, making this the only reasonable choice. Command `6` would technically be valid because there is no check for the number of arguments for command `6`, however if this was in the packet it would also mean that there is 0x40 bytes of extra useless data, which seems unlikely.
+
+So the actual decrypted contents of the command payload would looks something very similar to this (except with a real new `HMAC` key)
 ```
 command_bytes = b''.join([b'2'.ljust(0x40, b'\x00'),
                           b'1'.ljust(0x40, b'\x00'),
@@ -365,39 +383,47 @@ New HMAC Key
 000000b0: 0000 0000 0000 0000 0000 0000 0000 0000  ................
 ```
 
+Due to the command being an `Update HMAC Key` command, the last argument couldn't be known ahead of time without brute forcing. Because the hmac key could be anywhere from 1 to 64 bytes in an unknown format, my strategy of guessing the HMAC key without decrypting the packet would probably take longer than the rest of my life (and therefore longer than the codebreaker challenge was running), so I was forced to actually figure out how to decrypt the packet.
+
+# Identifying the AES Mode:
+
+After looking online at a [basic aes implementation](https://github.com/kokke/tiny-AES-c), it looked like the expanded key size for aes 128 is 176 bytes and the key length is 16 bytes, which matched what I saw in `agent`.
+
+## attributes of the aes impl
+- block cipher
+    - loops over the function that does decryption and decrypts 0x10 bytes at a time
+- 0x10 byte blocks
+- is AES 128
+- 176 byte expanded key
+- 10 rounds per block
+- 16 byte key
+    - key is the first 16 bytes of the sha256sum of the ecc-encrypted stuff once it is decrypted
+- Uses a 16 byte IV
+    - first 8 bytes are a portion of the sha256sum of the ecc-encrypted stuff once it is decrypted
+    - second 8 bytes can always be known and are just the little-endian index (starting at 1) of the round
+- only an SBox was found, not an inverse sbox, which I beleive indicates that the mode uses the same function for encryption as decryption
+
+## Valid-ish AES modes
+- OFB - matched initially on a live test, current best candidate, but `pycryptodome` doesn't match after the first run, so a whole new instance needs to be created with the updated IV every time
+- CTR - uses outer loop, and increments a value in its IV every time, could very easily be this. Confirmed, This works, it just needs very specific arguments in `pycryptodome`
+
+**AES is 128 bit in CTR mode**
+
+
 # Identifying the implementation for NIST-P256
 
-After a little bit of thought I realized that during one of the tech-talks
-someone mentioned that the open source projects that were used in the
-challenge are listed on [https://nsa-codebreaker.org/thanks](https://nsa-codebreaker.org/thanks),
-So I looked around there and found that
-[https://github.com/intel/tinycrypt](https://github.com/intel/tinycrypt)
-is listed as one of the projects. Up until this point I had been unable
-to identify which crypto implementation was being used. I assumed that
-it was some open-source crypto library because implementing your own
-crypto from scratch is unwise, buggy, and a huge time-sink. Identifying the implementation wasn't necessary for solving, however it did
-significantly speed up reverse engineering, and it took me about an hour to
-symbolize things in ghidra compared to the `>4` hours I spent reversing
-the AES implementation and identifying which mode of AES it was actually using.
+After a little bit of thought I realized that during one of the tech-talks someone mentioned that the open source projects that were used in the challenge are listed on [https://nsa-codebreaker.org/thanks](https://nsa-codebreaker.org/thanks), So I looked around there and found that [https://github.com/intel/tinycrypt](https://github.com/intel/tinycrypt) is listed as one of the projects. Up until this point I had been unable to identify which crypto implementation was being used. I assumed that it was some open-source crypto library because implementing your own crypto from scratch is unwise, buggy, and a huge time-sink. Identifying the implementation wasn't necessary for solving, however it did significantly speed up reverse engineering, and it took me about an hour to symbolize things in ghidra compared to the `>4` hours I spent reversing the AES implementation and identifying which mode of AES it was actually using.
 
 
-# The first issue with the encryption
-
-After running packets through the server so many times and slowly setting up my
-gdb hooks, I realized that the value being passed into `sha256.update()` to
-generate the AES key was one of the coordinates related to the private key
-that I was using (one that I ended up generating from the `tinycrypt` library),
-the `X` value that was contained within the public key present on the device firmware.
-
-What I was actually seeing was the
+# A similarity between the generated shared secret and public key
 
 ![](../resources/File_Public_key_shared_secret.svg)
 
+After running packets through the server so many times and slowly setting up my gdb hooks, I realized that the value being passed into `sha256.update()` to generate the AES key was one of the coordinates related to the private key that I was using (one that I ended up generating from the `tinycrypt` library), the `X` value that was contained within the public key present on the device firmware. To be completely honest, I think that I just got lucky here when I noticed this. I think that the value that was unchanged between the public and private key was probably a result of the issue with the crypto that I learned about after the competition, but either way I saw that the shared secret was something that I could predict, so I abused that.
 
 ## Decrypting packets
 
-Seeing that the value was just generated every time using the private key and the server's public key (the first 0x40 bytes of the packet, I added a
-gdb hook to overwrite the buffer with the `X` coordinate from the `ecc_p256_public.bin` that was present in the firmware whenever the `uECC_shared_secret` function finished up. By running this with my `gdbinit` I bypassed the need for the correct private key, instead just the correct public key is sufficient.
+Seeing that the value was just generated every time using the private key and the server's public key (the first 0x40 bytes of the packet, I added a gdb hook to overwrite the buffer with the `X` coordinate from the `ecc_p256_public.bin` that was present in the firmware whenever the `uECC_shared_secret` function finished up. By running this with my `gdbinit` I bypassed the need for the correct private key, instead just the correct public key is sufficient.
 
 ```
 set $BINBASE = 0
@@ -422,6 +448,7 @@ commands
     # inject the public-key X coordinate into the buffer holding the shared-secret
     printf "injecting shared secret\n"
     py shared_secret_addr = int(gdb.parse_and_eval("$ECC_OUTBUF").format_string())
+    # these bytes were the bytes from the public key
     py write_bytes = bytes.fromhex("894d 6341 662a 70e3 d4f8 467c 9b25 7bbc0ff2 f558 a241 6335 c7d4 8845 532c 8ca6")
     py inf = gdb.selected_inferior()
     py inf.write_memory(shared_secret_addr, write_bytes, len(write_bytes))
@@ -429,10 +456,9 @@ commands
 end
 ```
 
-So after adding my gdb hook to populate the correct value for
-key generation, the packet that I was sending started decrypting correctly.
+So after adding my gdb hook to populate the correct value for key generation, the packet that I was sending started decrypting correctly.
 
-and here are the actual packet bytes:
+Here are the actual packet bytes:
 ```
 7ff6fdb538: 3200 0000 0000 0000 0000 0000 0000 0000  2...............
 7ff6fdb548: 0000 0000 0000 0000 0000 0000 0000 0000  ................
@@ -448,6 +474,11 @@ and here are the actual packet bytes:
 7ff6fdb5e8: 0000 0000 0000 0000 0000 0000 0000 0000  ................
 ```
 
-Using the format from this decrypted packet, I was able to brute force the current hmac key, which was `secret_key_91579`
+So I had the new hmac key, but not the one that was actually used for the packet that was used for the packet that I was given. So to get that, I went back to my previous plan of guessing the HMAC key, now knowing a format that was likely to be similar to the key.
+
+Using the format from this decrypted packet, I was able to brute force the current hmac key by re-creating the hmac calculation algorithm in python and iterating the numbers at the end of the key until the output hash matched the one from the packet. When one finally did, the key was `secret_key_91579`.
+
+# The actual crypto bug
+After I joined the codebreaker challenge solvers discord channel, I learned that the private key used by the attackers was created poorly and that the base point of the elliptic curve was something like 0 or 1.
 
 

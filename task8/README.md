@@ -478,6 +478,8 @@ So I had the new hmac key, but not the one that was actually used for the packet
 
 Using the format from this decrypted packet, I was able to brute force the current hmac key by re-creating the hmac calculation algorithm in python and iterating the numbers at the end of the key until the output hash matched the one from the packet. When one finally did, the key was `secret_key_91579`.
 
+The script that I used to guess the hmac key is [hmac_crack.py](../dockerdir/hmac_crack.py).
+
 # The actual crypto bug
 After I joined the codebreaker challenge solvers discord channel, I learned that the private key used by the attackers was created poorly and that the base point of the elliptic curve was something like 0 or 1.
 

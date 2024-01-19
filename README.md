@@ -32,3 +32,7 @@ Please note that some parts of this writeup are still WIP
 - [Task 7 - There is Another - (Reverse Engineering, Exploitation)](/task7/README.md)
 - [Task 8 - Decrypt the Comms - (Reverse Engineering, Cryptography)](/task8/README.md)
 - [Task 9 - Stop the Devices - (Reverse Engineering, Cryptography)](/task9/README.md)
+
+
+# Highlights
+- Most of the reversing can be found in the [task 5](/task5/README.md) and [task 8](/task8/README.md) writeups

